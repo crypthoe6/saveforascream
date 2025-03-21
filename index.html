@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>saveforascream</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      color: #ccc;
+      font-family: 'IBM Plex Mono', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      flex-direction: column;
+    }
+    h1 {
+      font-size: 2rem;
+      cursor: pointer;
+      text-align: center;
+    }
+    a {
+      position: absolute;
+      color: #fff;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .entry-title {
+      font-size: 1.2rem;
+      color: #fff;
+      cursor: pointer;
+      position: absolute;
+    }
+    .entry-text {
+      font-size: 0.95rem;
+      color: #bbb;
+      display: none;
+    }
+    *:focus {
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="titre">saveforascream</h1>
+  <div id="menu" style="display: none;">
+    <a href="#projets">projets</a>
+    <a href="#journal">journal</a>
+    <a href="#contact">contact</a>
+  </div>
+  <div id="journal-articles" style="display: none;">
+    <div class="entry-title" onclick="openEntry(this)">journal / entrée n°1</div>
+    <div class="entry-title" onclick="openEntry(this)">journal / entrée n°2</div>
+    <div class="entry-title" onclick="openEntry(this)">journal / entrée n°3</div>
+  </div>
+  <div id="projets-articles" style="display: none;">
+    <div class="entry-title" onclick="openEntry(this)">projet / la perle</div>
+    <div class="entry-title" onclick="openEntry(this)">projet / the siberian jesus tape</div>
+  </div>
+  <script>
+    const titre = document.getElementById('titre');
+    const menu = document.getElementById('menu');
+    const links = menu.querySelectorAll('a');
+
+    titre.addEventListener('click', () => {
+      menu.style.display = 'block';
+      links.forEach(link => {
+        const x = Math.random() * (window.innerWidth - 100);
+        const y = Math.random() * (window.innerHeight - 30);
+        link.style.left = `${x}px`;
+        link.style.top = `${y}px`;
+        link.style.display = 'block';
+      });
+    });
+
+    links.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        titre.textContent = link.textContent;
+        menu.style.display = 'none';
+        document.getElementById('journal-articles').style.display = link.hash === '#journal' ? 'block' : 'none';
+        document.getElementById('projets-articles').style.display = link.hash === '#projets' ? 'block' : 'none';
+      });
+    });
+
+    function openEntry(entry) {
+      titre.textContent = 'saveforascream';
+      menu.style.display = 'none';
+      document.getElementById('journal-articles').style.display = 'none';
+      document.getElementById('projets-articles').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
