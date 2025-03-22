@@ -67,7 +67,7 @@
     <h1 id="titre">saveforascream</h1>
     <div id="menu" style="opacity: 0; transition: opacity 0.6s; margin-top: 2rem;">
       <a href="#a-propos">à propos</a><br>
-      <a href="#projets">projets</a><br>
+      <a href="#experiences">expériences</a><br>
       <a href="#journal">journal</a><br>
       <a href="#contact">contact</a>
     </div>
@@ -85,13 +85,13 @@
         <div class="entry-text" style="display: none;">Chaque clic est une convocation, un écho. Une interface comme un esprit : instable.</div>
       </div>
     </div>
-    <div id="projets-articles" style="display: none; margin-top: 2rem; text-align: left; max-width: 600px;">
+    <div id="experiences-articles" style="display: none; margin-top: 2rem; text-align: left; max-width: 600px;">
       <div style="margin-bottom: 2rem;">
-        <div class="entry-title" onclick="hideOtherEntries(this)">projet / la perle</div>
+        <div class="entry-title" onclick="hideOtherEntries(this)">expérience / la perle</div>
         <div class="entry-text" style="display: none;">Une boucle d’un geste, un gant jamais vraiment ôté. La vidéo tourne sans fin, comme une mémoire numérique suspendue.</div>
       </div>
       <div style="margin-bottom: 2rem;">
-        <div class="entry-title" onclick="hideOtherEntries(this)">projet / the siberian jesus tape</div>
+        <div class="entry-title" onclick="hideOtherEntries(this)">expérience / the siberian jesus tape</div>
         <div class="entry-text" style="display: none;">Une composition en dérive, fondée sur des itérations IA. Une prophétie gelée dans un flux sonore jamais résolu.</div>
       </div>
     </div>
@@ -111,7 +111,7 @@
         link.classList.add('flash');
         setTimeout(() => link.classList.remove('flash'), 300);
       });
-      const sections = document.querySelectorAll('#journal-articles, #projets-articles');
+      const sections = document.querySelectorAll('#journal-articles, #experiences-articles');
       sections.forEach(section => section.style.display = 'none');
       menu.style.opacity = '1';
       titre.textContent = 'saveforascream';
@@ -135,13 +135,13 @@
           entries = document.querySelectorAll('#journal-articles .entry-title');
           contents = document.querySelectorAll('#journal-articles .entry-text');
           document.getElementById('journal-articles').style.display = 'block';
-          document.getElementById('projets-articles').style.display = 'none';
+          document.getElementById('experiences-articles').style.display = 'none';
         }
 
-        if (href === '#projets') {
-          entries = document.querySelectorAll('#projets-articles .entry-title');
-          contents = document.querySelectorAll('#projets-articles .entry-text');
-          document.getElementById('projets-articles').style.display = 'block';
+        if (href === '#experiences') {
+          entries = document.querySelectorAll('#experiences-articles .entry-title');
+          contents = document.querySelectorAll('#experiences-articles .entry-text');
+          document.getElementById('experiences-articles').style.display = 'block';
           document.getElementById('journal-articles').style.display = 'none';
         }
 
@@ -178,7 +178,7 @@
         link.classList.add('flash');
         setTimeout(() => link.classList.remove('flash'), 300);
       });
-      const sections = document.querySelectorAll('#journal-articles, #projets-articles');
+      const sections = document.querySelectorAll('#journal-articles, #experiences-articles');
       sections.forEach(section => section.style.display = 'none');
     }
   </script>
