@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>saveforascream</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
   <style>
@@ -11,7 +11,6 @@
       color: #fff;
       text-decoration: none;
       transition: color 0.3s;
-      cursor: pointer;
     }
     body {
       margin: 0;
@@ -34,16 +33,24 @@
       margin: 0 0 0.5rem 0;
       cursor: pointer;
     }
+    .subtitle {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 2rem;
+    }
+    .entry-title {
+      font-size: 1.2rem;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+    }
     .entry-text {
       font-size: 0.95rem;
       line-height: 1.5;
       color: #bbb;
-      position: absolute;
-      max-width: 600px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
+    }
+    #menu a {
+      display: block;
     }
     @keyframes flash {
       0% { color: #ccc; }
@@ -53,115 +60,129 @@
     .flash {
       animation: flash 0.3s ease;
     }
-    *:focus {
-      outline: none;
-    }
   </style>
 </head>
 <body>
   <main>
     <h1 id="titre">saveforascream</h1>
-    <div id="menu" style="opacity: 0; transition: opacity 0.6s; position: absolute; top: 0; left: 0; right: 0; bottom: 0;"></div>
-    <div id="content" style="display: none;"></div>
+    <div id="menu" style="opacity: 0; transition: opacity 0.6s; margin-top: 2rem;">
+      <a href="#a-propos">à propos</a><br>
+      <a href="#projets">projets</a><br>
+      <a href="#journal">journal</a><br>
+      <a href="#contact">contact</a>
+    </div>
+    <div id="journal-articles" style="display: none; margin-top: 2rem; text-align: left; max-width: 600px;">
+      <div style="margin-bottom: 2rem;">
+        <div class="entry-title" onclick="hideOtherEntries(this)">journal / entrée n°1</div>
+        <div class="entry-text" style="display: none;">Texte flottant, image absente. Quelque chose a eu lieu — ou va venir.</div>
+      </div>
+      <div style="margin-bottom: 2rem;">
+        <div class="entry-title" onclick="hideOtherEntries(this)">journal / entrée n°2</div>
+        <div class="entry-text" style="display: none;">Le silence dans les vidéos est plus parlant que les voix générées. L’IA halète mais ne dit rien.</div>
+      </div>
+      <div style="margin-bottom: 2rem;">
+        <div class="entry-title" onclick="hideOtherEntries(this)">journal / entrée n°3</div>
+        <div class="entry-text" style="display: none;">Chaque clic est une convocation, un écho. Une interface comme un esprit : instable.</div>
+      </div>
+    </div>
+    <div id="projets-articles" style="display: none; margin-top: 2rem; text-align: left; max-width: 600px;">
+      <div style="margin-bottom: 2rem;">
+        <div class="entry-title" onclick="hideOtherEntries(this)">projet / la perle</div>
+        <div class="entry-text" style="display: none;">Une boucle d’un geste, un gant jamais vraiment ôté. La vidéo tourne sans fin, comme une mémoire numérique suspendue.</div>
+      </div>
+      <div style="margin-bottom: 2rem;">
+        <div class="entry-title" onclick="hideOtherEntries(this)">projet / the siberian jesus tape</div>
+        <div class="entry-text" style="display: none;">Une composition en dérive, fondée sur des itérations IA. Une prophétie gelée dans un flux sonore jamais résolu.</div>
+      </div>
+    </div>
   </main>
   <script>
-    const titreElement = document.getElementById('titre');
+    const titre = document.getElementById('titre');
     const menu = document.getElementById('menu');
-    const content = document.getElementById('content');
+    const links = document.querySelectorAll('#menu a');
 
-    const rubriques = [
-      { id: 'a-propos', label: 'à propos' },
-      { id: 'projets', label: 'projets' },
-      { id: 'journal', label: 'journal' },
-      { id: 'contact', label: 'contact' }
-    ];
-
-    const entreesJournal = [
-      { date: '21.03.2025', texte: 'Chaque clic est une convocation, un écho. Une interface comme un esprit : instable.' },
-      { date: '15.02.2025', texte: 'Le silence dans les vidéos est plus parlant que les voix générées. L’IA halète mais ne dit rien.' },
-      { date: '01.01.2025', texte: 'Texte flottant, image absente. Quelque chose a eu lieu — ou va venir.' }
-    ];
-
-    function shuffleArray(array) {
-      let currentIndex = array.length, temporaryValue, randomIndex;
-      while (0 !== currentIndex) {
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
-      }
-      return array;
-    }
-
-    function afficherMenuAleatoire() {
-      menu.innerHTML = '';
-      const shuffled = shuffleArray(rubriques.slice());
-      shuffled.forEach(rubrique => {
-        const link = document.createElement('a');
-        link.href = `#${rubrique.id}`;
-        link.textContent = rubrique.label;
-        const x = Math.floor(Math.random() * (window.innerWidth - 150));
-        const y = Math.floor(Math.random() * (window.innerHeight - 50));
-        link.style.left = `${x}px`;
-        link.style.top = `${y}px`;
-        link.classList.add('flash');
-        setTimeout(() => link.classList.remove('flash'), 300);
-        link.addEventListener('click', e => {
-          e.preventDefault();
-          if (rubrique.label === 'journal') {
-            afficherDatesJournal();
-          } else {
-            afficherContenuRubrique(rubrique.label);
-          }
-        });
-        menu.appendChild(link);
-      });
-      menu.style.opacity = '1';
-    }
-
-    function afficherDatesJournal() {
-      titreElement.textContent = 'journal';
-      menu.innerHTML = '';
-      content.style.display = 'none';
-      const shuffled = shuffleArray(entreesJournal.slice());
-      shuffled.forEach(entree => {
-        const dateLink = document.createElement('a');
-        dateLink.textContent = entree.date;
+    titre.addEventListener('click', () => {
+      links.forEach(link => {
         const x = Math.floor(Math.random() * (window.innerWidth - 100));
         const y = Math.floor(Math.random() * (window.innerHeight - 30));
-        dateLink.style.left = `${x}px`;
-        dateLink.style.top = `${y}px`;
-        dateLink.classList.add('flash');
-        setTimeout(() => dateLink.classList.remove('flash'), 300);
-        dateLink.addEventListener('click', () => {
-          content.innerHTML = `<div class='entry-text'>${entree.texte}</div>`;
-          content.style.display = 'block';
-          menu.innerHTML = '';
-        });
-        menu.appendChild(dateLink);
+        link.style.left = x + 'px';
+        link.style.top = y + 'px';
+        link.style.display = 'block';
+        link.classList.add('flash');
+        setTimeout(() => link.classList.remove('flash'), 300);
       });
+      const sections = document.querySelectorAll('#journal-articles, #projets-articles');
+      sections.forEach(section => section.style.display = 'none');
       menu.style.opacity = '1';
-    }
-
-    function afficherContenuRubrique(titre) {
-      titreElement.textContent = titre;
-      menu.style.opacity = '0';
-      menu.innerHTML = '';
-      content.style.display = 'block';
-      content.innerHTML = `<p class='entry-text'>Contenu de la rubrique <strong>${titre}</strong></p>`;
-    }
-
-    titreElement.addEventListener('click', () => {
-      // Retour à l'accueil dans tous les cas
-      titreElement.textContent = 'saveforascream';
-      content.style.display = 'none';
-      menu.innerHTML = '';
-      afficherMenuAleatoire();
+      titre.textContent = 'saveforascream';
+      titre.classList.add('flash');
+      setTimeout(() => titre.classList.remove('flash'), 300);
     });
 
-    window.onload = afficherMenuAleatoire;
+    links.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const href = link.getAttribute('href');
+        const rubrique = link.textContent;
+        titre.textContent = rubrique;
+        menu.style.opacity = '0';
+        links.forEach(l => l.style.display = 'none');
+
+        let entries = [];
+        let contents = [];
+
+        if (href === '#journal') {
+          entries = document.querySelectorAll('#journal-articles .entry-title');
+          contents = document.querySelectorAll('#journal-articles .entry-text');
+          document.getElementById('journal-articles').style.display = 'block';
+          document.getElementById('projets-articles').style.display = 'none';
+        }
+
+        if (href === '#projets') {
+          entries = document.querySelectorAll('#projets-articles .entry-title');
+          contents = document.querySelectorAll('#projets-articles .entry-text');
+          document.getElementById('projets-articles').style.display = 'block';
+          document.getElementById('journal-articles').style.display = 'none';
+        }
+
+        entries.forEach(entry => {
+          const x = Math.floor(Math.random() * (window.innerWidth - 300));
+          const y = Math.floor(Math.random() * (window.innerHeight - 50));
+          entry.style.position = 'absolute';
+          entry.style.left = x + 'px';
+          entry.style.top = y + 'px';
+          entry.style.display = 'block';
+        });
+
+        contents.forEach(content => content.style.display = 'none');
+      });
+    });
+
+    function hideOtherEntries(clicked) {
+      const content = clicked.nextElementSibling;
+      if (content && content.style.display === 'none') {
+        content.style.display = 'block';
+      } else if (content) {
+        content.style.display = 'none';
+      }
+
+      // Retour à l'accueil
+      titre.textContent = 'saveforascream';
+      menu.style.opacity = '1';
+      links.forEach(link => {
+        const x = Math.floor(Math.random() * (window.innerWidth - 100));
+        const y = Math.floor(Math.random() * (window.innerHeight - 30));
+        link.style.left = x + 'px';
+        link.style.top = y + 'px';
+        link.style.display = 'block';
+        link.classList.add('flash');
+        setTimeout(() => link.classList.remove('flash'), 300);
+      });
+      const sections = document.querySelectorAll('#journal-articles, #projets-articles');
+      sections.forEach(section => section.style.display = 'none');
+    }
   </script>
 </body>
 </html>
+
 
