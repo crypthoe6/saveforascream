@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>saveforascream</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
   <style>
@@ -43,6 +43,7 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+      text-align: center;
     }
     @keyframes flash {
       0% { color: #ccc; }
@@ -148,14 +149,21 @@
       menu.style.opacity = '0';
       menu.innerHTML = '';
       content.style.display = 'block';
-      content.innerHTML = `<p>Contenu de la rubrique <strong>${titre}</strong></p>`;
+      content.innerHTML = `<p class='entry-text'>Contenu de la rubrique <strong>${titre}</strong></p>`;
     }
 
     titreElement.addEventListener('click', () => {
-      titreElement.textContent = 'saveforascream';
-      content.style.display = 'none';
-      afficherMenuAleatoire();
-    });
+  if (titreElement.textContent !== 'saveforascream') {
+    // Retour à l'accueil si on clique sur le titre d'une rubrique
+    titreElement.textContent = 'saveforascream';
+    content.style.display = 'none';
+    menu.innerHTML = '';
+    afficherMenuAleatoire();
+  } else {
+    // Affichage initial des rubriques si on est déjà sur "saveforascream"
+    afficherMenuAleatoire();
+  }
+});
 
     window.onload = afficherMenuAleatoire;
   </script>
