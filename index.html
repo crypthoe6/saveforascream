@@ -6,6 +6,13 @@
   <title>saveforascream</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
   <style>
+    a {
+      position: absolute;
+      color: #fff;
+      text-decoration: none;
+      transition: color 0.3s;
+      cursor: pointer;
+    }
     body {
       margin: 0;
       background-color: #000;
@@ -18,27 +25,32 @@
       overflow: hidden;
       flex-direction: column;
     }
-    h1 {
-      font-size: 2rem;
-      cursor: pointer;
+    main {
       text-align: center;
     }
-    a {
-      position: absolute;
-      color: #fff;
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-    .entry-title {
-      font-size: 1.2rem;
-      color: #fff;
+    h1 {
+      font-weight: normal;
+      font-size: 2rem;
+      margin: 0 0 0.5rem 0;
       cursor: pointer;
-      position: absolute;
     }
     .entry-text {
       font-size: 0.95rem;
+      line-height: 1.5;
       color: #bbb;
-      display: none;
+      position: absolute;
+      max-width: 600px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    @keyframes flash {
+      0% { color: #ccc; }
+      50% { color: #fff; }
+      100% { color: #ccc; }
+    }
+    .flash {
+      animation: flash 0.3s ease;
     }
     *:focus {
       outline: none;
@@ -46,53 +58,107 @@
   </style>
 </head>
 <body>
-  <h1 id="titre">saveforascream</h1>
-  <div id="menu" style="display: none;">
-    <a href="#projets">projets</a>
-    <a href="#journal">journal</a>
-    <a href="#contact">contact</a>
-  </div>
-  <div id="journal-articles" style="display: none;">
-    <div class="entry-title" onclick="openEntry(this)">journal / entrée n°1</div>
-    <div class="entry-title" onclick="openEntry(this)">journal / entrée n°2</div>
-    <div class="entry-title" onclick="openEntry(this)">journal / entrée n°3</div>
-  </div>
-  <div id="projets-articles" style="display: none;">
-    <div class="entry-title" onclick="openEntry(this)">projet / la perle</div>
-    <div class="entry-title" onclick="openEntry(this)">projet / the siberian jesus tape</div>
-  </div>
+  <main>
+    <h1 id="titre">saveforascream</h1>
+    <div id="menu" style="opacity: 0; transition: opacity 0.6s; position: absolute; top: 0; left: 0; right: 0; bottom: 0;"></div>
+    <div id="content" style="display: none;"></div>
+  </main>
   <script>
-    const titre = document.getElementById('titre');
+    const titreElement = document.getElementById('titre');
     const menu = document.getElementById('menu');
-    const links = menu.querySelectorAll('a');
+    const content = document.getElementById('content');
 
-    titre.addEventListener('click', () => {
-      menu.style.display = 'block';
-      links.forEach(link => {
-        const x = Math.random() * (window.innerWidth - 100);
-        const y = Math.random() * (window.innerHeight - 30);
+    const rubriques = [
+      { id: 'a-propos', label: 'à propos' },
+      { id: 'projets', label: 'projets' },
+      { id: 'journal', label: 'journal' },
+      { id: 'contact', label: 'contact' }
+    ];
+
+    const entreesJournal = [
+      { date: '21.03.2025', texte: 'Chaque clic est une convocation, un écho. Une interface comme un esprit : instable.' },
+      { date: '15.02.2025', texte: 'Le silence dans les vidéos est plus parlant que les voix générées. L’IA halète mais ne dit rien.' },
+      { date: '01.01.2025', texte: 'Texte flottant, image absente. Quelque chose a eu lieu — ou va venir.' }
+    ];
+
+    function shuffleArray(array) {
+      let currentIndex = array.length, temporaryValue, randomIndex;
+      while (0 !== currentIndex) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+      return array;
+    }
+
+    function afficherMenuAleatoire() {
+      menu.innerHTML = '';
+      const shuffled = shuffleArray(rubriques.slice());
+      shuffled.forEach(rubrique => {
+        const link = document.createElement('a');
+        link.href = `#${rubrique.id}`;
+        link.textContent = rubrique.label;
+        const x = Math.floor(Math.random() * (window.innerWidth - 150));
+        const y = Math.floor(Math.random() * (window.innerHeight - 50));
         link.style.left = `${x}px`;
         link.style.top = `${y}px`;
-        link.style.display = 'block';
+        link.classList.add('flash');
+        setTimeout(() => link.classList.remove('flash'), 300);
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          if (rubrique.label === 'journal') {
+            afficherDatesJournal();
+          } else {
+            afficherContenuRubrique(rubrique.label);
+          }
+        });
+        menu.appendChild(link);
       });
-    });
-
-    links.forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
-        titre.textContent = link.textContent;
-        menu.style.display = 'none';
-        document.getElementById('journal-articles').style.display = link.hash === '#journal' ? 'block' : 'none';
-        document.getElementById('projets-articles').style.display = link.hash === '#projets' ? 'block' : 'none';
-      });
-    });
-
-    function openEntry(entry) {
-      titre.textContent = 'saveforascream';
-      menu.style.display = 'none';
-      document.getElementById('journal-articles').style.display = 'none';
-      document.getElementById('projets-articles').style.display = 'none';
+      menu.style.opacity = '1';
     }
+
+    function afficherDatesJournal() {
+      titreElement.textContent = 'journal';
+      menu.innerHTML = '';
+      content.style.display = 'none';
+      const shuffled = shuffleArray(entreesJournal.slice());
+      shuffled.forEach(entree => {
+        const dateLink = document.createElement('a');
+        dateLink.textContent = entree.date;
+        const x = Math.floor(Math.random() * (window.innerWidth - 100));
+        const y = Math.floor(Math.random() * (window.innerHeight - 30));
+        dateLink.style.left = `${x}px`;
+        dateLink.style.top = `${y}px`;
+        dateLink.classList.add('flash');
+        setTimeout(() => dateLink.classList.remove('flash'), 300);
+        dateLink.addEventListener('click', () => {
+          content.innerHTML = `<div class='entry-text'>${entree.texte}</div>`;
+          content.style.display = 'block';
+          menu.innerHTML = '';
+        });
+        menu.appendChild(dateLink);
+      });
+      menu.style.opacity = '1';
+    }
+
+    function afficherContenuRubrique(titre) {
+      titreElement.textContent = titre;
+      menu.style.opacity = '0';
+      menu.innerHTML = '';
+      content.style.display = 'block';
+      content.innerHTML = `<p>Contenu de la rubrique <strong>${titre}</strong></p>`;
+    }
+
+    titreElement.addEventListener('click', () => {
+      titreElement.textContent = 'saveforascream';
+      content.style.display = 'none';
+      afficherMenuAleatoire();
+    });
+
+    window.onload = afficherMenuAleatoire;
   </script>
 </body>
 </html>
+
