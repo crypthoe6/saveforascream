@@ -152,18 +152,17 @@
       content.innerHTML = `<p class='entry-text'>Contenu de la rubrique <strong>${titre}</strong></p>`;
     }
 
+    // 🔹 Correction : Quand on clique sur le titre de la rubrique, retour à l'accueil
     titreElement.addEventListener('click', () => {
-  if (titreElement.textContent !== 'saveforascream') {
-    // Retour à l'accueil si on clique sur le titre d'une rubrique
-    titreElement.textContent = 'saveforascream';
-    content.style.display = 'none';
-    menu.innerHTML = '';
-    afficherMenuAleatoire();
-  } else {
-    // Affichage initial des rubriques si on est déjà sur "saveforascream"
-    afficherMenuAleatoire();
-  }
-});
+      if (titreElement.textContent !== 'saveforascream') {
+        titreElement.textContent = 'saveforascream';
+        content.style.display = 'none';
+        menu.innerHTML = '';
+        afficherMenuAleatoire();
+      } else {
+        afficherMenuAleatoire();
+      }
+    });
 
     window.onload = afficherMenuAleatoire;
   </script>
