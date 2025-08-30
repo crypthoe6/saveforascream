@@ -1,1 +1,20 @@
-
+[
+  {
+    "title": "la perle",
+    "path": "experiences/la-perle.html",
+    "date": "2025-08-30",
+    "summary": "Boucle d’un geste, gant jamais vraiment ôté."
+  },
+  {
+    "title": "the siberian jesus tape",
+    "path": "experiences/siberian-jesus.html",
+    "date": "2025-06-10",
+    "summary": "Composition en dérive, itérations IA."
+  },
+  {
+    "title": "Journal — 001",
+    "path": "journal/journal-001.html",
+    "date": "2025-07-01",
+    "summary": "Notes, fragments."
+  }
+]
