@@ -3,97 +3,158 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin — saveforascream</title>
+  <title>saveforascream</title>
   <style>
-    html,body{background:#000;color:#ddd;font-family:ui-monospace, SFMono-Regular, Menlo, monospace;margin:0}
-    a{color:#ddd}
-    .wrap{max-width:980px;margin:0 auto;padding:24px}
-    h1{font-size:28px;margin:0 0 12px}
-    h2{margin:18px 0 8px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    .card{border:1px solid #333;border-radius:12px;padding:16px;background:#0b0b0b}
-    .tag{font-size:12px;opacity:.7}
-    .btns a{display:inline-block;margin-right:10px;border:1px solid #444;border-radius:8px;padding:6px 10px;text-decoration:none}
-    .btns a:hover{border-color:#ddd}
-    .add{margin:20px 0;padding:12px;border:1px dashed #444;border-radius:12px}
-    code{background:#111;padding:2px 4px;border-radius:4px}
-    .warn{opacity:.8}
+    :root{ --bg:#000; --fg:#ddd; --muted:#a8a8a8; --line:#2a2a2a; }
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace; overflow:hidden}
+    a{color:var(--fg);text-decoration:none}
+    /* Titre centré, fixe */
+    #titre{
+      position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+      font-size:clamp(28px,6vw,64px); letter-spacing:.02em; white-space:nowrap;
+      cursor:pointer; user-select:none;
+    }
+    /* Conteneur des entrées en positionnement libre */
+    #cloud{position:relative; width:100vw; height:100vh; pointer-events:none;}
+    .entry{
+      position:absolute; font-size:clamp(14px,2.2vw,22px);
+      opacity:.9; transition:transform .5s ease, opacity .25s ease;
+      pointer-events:auto; padding:.15rem .25rem; border-radius:.4rem;
+    }
+    .entry:hover{opacity:1; text-decoration:underline}
+    .hint{
+      position:fixed; left:50%; top:calc(50% + 3.6rem); transform:translateX(-50%);
+      font-size:12px; color:var(--muted); opacity:.9; user-select:none;
+      transition:opacity .3s ease;
+    }
+    .fade{opacity:0}
+    /* Petit lien admin optionnel */
+    .admin{position:fixed; right:14px; bottom:10px; font-size:12px; color:var(--muted)}
+    @media (max-width:520px){ .hint{top:calc(50% + 3rem)} }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>saveforascream — admin</h1>
-    <p class="warn">Cette page lit <code>content/index.json</code>. Clique “ouvrir”, “éditer contenu”, “éditer l’index”.</p>
-
-    <div id="lists">Chargement…</div>
-
-    <div class="add">
-      <h3>+ Ajouter un contenu</h3>
-      <ol>
-        <li>Duplique un fichier modèle (ex: <code>/experiences/la-perle.html</code>) et renomme-le.</li>
-        <li>Ajoute l’entrée correspondante dans <code>content/index.json</code> (titre, date, chemin…)</li>
-        <li>Reviens ici et vérifie qu’il apparaît.</li>
-      </ol>
-    </div>
-  </div>
+  <div id="titre" aria-label="afficher les entrées">saveforascream</div>
+  <div id="cloud" aria-live="polite"></div>
+  <div id="hint" class="hint">clique sur <em>saveforascream</em> pour faire apparaître / réarranger</div>
+  <a class="admin" href="admin.html">admin</a>
 
   <script>
-    // Détecte owner/repo pour le lien "éditer sur GitHub"
-    function detectRepo(){
-      // ex: https://username.github.io/reponame/...
-      const hostParts = location.hostname.split('.');
-      const owner = hostParts[0]; // username
-      const pathParts = location.pathname.split('/').filter(Boolean);
-      const repo = pathParts.length ? pathParts[0] : ''; // reponame
-      return { owner, repo };
-    }
-    const { owner, repo } = detectRepo();
-    const EDIT_BASE = (owner && repo)
-      ? `https://github.com/${owner}/${repo}/edit/main/`
-      : null; // si domaine perso, EDIT_BASE sera null -> on n'affiche pas "éditer"
+    // --------- CONFIG ---------
+    const JSON_PATH = 'content/index.json'; // liste plate d’entrées
+    const MARGIN = 32;        // marge intérieure de l’écran pour placer les titres
+    const AVOID_RADIUS = 140; // zone à éviter autour du titre (px)
+    const SHUFFLE_ON = 'both';// 'title' (au clic sur titre), 'entry' (au clic entrée), 'both'
 
-    fetch('content/index.json?_=' + Date.now())
+    // --------- ÉTAT ---------
+    let ENTRIES = [];      // {title, path, date?, summary?}
+    let shown = false;
+
+    const titre = document.getElementById('titre');
+    const cloud = document.getElementById('cloud');
+    const hint  = document.getElementById('hint');
+
+    // Charger la liste
+    fetch(JSON_PATH + '?_=' + Date.now())
       .then(r => r.json())
-      .then(data => renderLists(data))
-      .catch(err => {
-        document.getElementById('lists').innerHTML =
-          "<p>Impossible de charger <code>content/index.json</code>. Vérifie le chemin.</p>";
-        console.error(err);
+      .then(list => {
+        ENTRIES = list.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+        buildCloud();
+      })
+      .catch(() => {
+        cloud.innerHTML = `<div class="entry" style="left:50%;top:50%;transform:translate(-50%,-50%)">
+          Impossible de charger <code>${JSON_PATH}</code></div>`;
       });
 
-    function renderLists(data){
-      const sections = ['experiences','journal'];
-      const container = document.getElementById('lists');
-      container.innerHTML = '';
-      sections.forEach(section=>{
-        const items = (data[section]||[]).slice()
-          .sort((a,b)=> (b.date||'').localeCompare(a.date||''));
-        const sec = document.createElement('div');
-        sec.innerHTML = `<h2>${section}</h2>`;
-        const grid = document.createElement('div');
-        grid.className = 'grid';
-        items.forEach(item=>{
-          const viewHref = item.path.endsWith('.html') ? item.path : item.path.replace(/\.md$/i, '.html');
-          const editHref = EDIT_BASE ? (EDIT_BASE + item.path) : null;
-          const editIndexHref = EDIT_BASE ? (EDIT_BASE + 'content/index.json') : null;
-
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.innerHTML = `
-            <div class="tag">${item.date || ''}</div>
-            <h3 style="margin:6px 0 10px">${item.title}</h3>
-            <p style="opacity:.8">${item.summary || ''}</p>
-            <div class="btns" style="margin-top:12px">
-              <a href="${viewHref}" target="_blank">ouvrir</a>
-              ${editHref ? `<a href="${editHref}" target="_blank">éditer contenu</a>` : ''}
-              ${editIndexHref ? `<a href="${editIndexHref}" target="_blank">éditer l’index</a>` : ''}
-            </div>`;
-          grid.appendChild(card);
+    // Construire les éléments cliquables
+    function buildCloud(){
+      cloud.innerHTML = '';
+      ENTRIES.forEach((it, idx) => {
+        const a = document.createElement('a');
+        a.className = 'entry fade';
+        a.textContent = it.title;
+        a.href = it.path;
+        a.setAttribute('data-idx', idx);
+        a.target = '_self';
+        a.addEventListener('click', (e) => {
+          // laisser s’ouvrir le lien, mais aussi réarranger si demandé
+          if (SHUFFLE_ON === 'entry' || SHUFFLE_ON === 'both'){
+            setTimeout(shufflePositions, 0);
+          }
         });
-        sec.appendChild(grid);
-        container.appendChild(sec);
+        cloud.appendChild(a);
       });
+      // première disposition cachée
+      positionEntries(true);
     }
+
+    // Placement aléatoire avec évitement du centre
+    function positionEntries(initial=false){
+      const W = window.innerWidth, H = window.innerHeight;
+      const cx = W/2, cy = H/2;
+      const entries = [...document.querySelectorAll('.entry')];
+
+      entries.forEach(el => {
+        let x, y, tries = 0;
+        do{
+          x = rand(MARGIN, W - MARGIN);
+          y = rand(MARGIN, H - MARGIN);
+          tries++;
+          // éviter un disque autour du centre (titre)
+        } while (dist(x, y, cx, cy) < AVOID_RADIUS && tries < 50);
+
+        // éviter que le texte sorte de l’écran
+        const tw = Math.min(300, W - 2*MARGIN);
+        el.style.maxWidth = tw + 'px';
+        el.style.left = x + 'px';
+        el.style.top  = y + 'px';
+
+        if (!initial) el.classList.remove('fade');
+      });
+
+      if (initial){
+        // on laisse tout caché au départ
+        entries.forEach(el => el.classList.add('fade'));
+      }
+    }
+
+    // Afficher / masquer + mélanger
+    function toggleShow(){
+      shown = !shown;
+      const entries = document.querySelectorAll('.entry');
+      if (shown){
+        entries.forEach(el => el.classList.remove('fade'));
+        shufflePositions();
+        hint.textContent = 'clique à nouveau pour réarranger';
+      }else{
+        entries.forEach(el => el.classList.add('fade'));
+        hint.textContent = 'clique sur saveforascream pour faire apparaître / réarranger';
+      }
+    }
+
+    function shufflePositions(){
+      // ne fait que réarranger (sans masquer)
+      positionEntries(false);
+    }
+
+    // Helpers
+    function rand(min, max){ return Math.random() * (max - min) + min; }
+    function dist(x1,y1,x2,y2){ return Math.hypot(x2-x1, y2-y1); }
+
+    // Événements
+    titre.addEventListener('click', () => {
+      if (!shown){
+        toggleShow();
+      }else{
+        if (SHUFFLE_ON === 'title' || SHUFFLE_ON === 'both') shufflePositions();
+        else toggleShow();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (shown) shufflePositions(); else positionEntries(true);
+    });
   </script>
 </body>
 </html>
