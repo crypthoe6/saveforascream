@@ -1,188 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>saveforascream</title>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — saveforascream</title>
   <style>
-    a {
-      position: absolute;
-      color: #fff;
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-    body {
-      margin: 0;
-      background-color: #000;
-      color: #ccc;
-      font-family: 'IBM Plex Mono', monospace;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      overflow: hidden;
-      flex-direction: column;
-    }
-    main {
-      text-align: center;
-    }
-    h1 {
-      font-weight: normal;
-      font-size: 2rem;
-      margin: 0 0 0.5rem 0;
-      cursor: pointer;
-    }
-    .subtitle {
-      font-size: 0.9rem;
-      color: #888;
-      margin-bottom: 2rem;
-    }
-    .entry-title {
-      font-size: 1.2rem;
-      color: #fff;
-      margin-bottom: 0.5rem;
-      cursor: pointer;
-    }
-    .entry-text {
-      font-size: 0.95rem;
-      line-height: 1.5;
-      color: #bbb;
-    }
-    #menu a {
-      display: block;
-    }
-    @keyframes flash {
-      0% { color: #ccc; }
-      50% { color: #fff; }
-      100% { color: #ccc; }
-    }
-    .flash {
-      animation: flash 0.3s ease;
-    }
+    html,body{background:#000;color:#ddd;font-family:ui-monospace, SFMono-Regular, Menlo, monospace;margin:0}
+    a{color:#ddd}
+    .wrap{max-width:980px;margin:0 auto;padding:24px}
+    h1{font-size:28px;margin:0 0 12px}
+    h2{margin:18px 0 8px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .card{border:1px solid #333;border-radius:12px;padding:16px;background:#0b0b0b}
+    .tag{font-size:12px;opacity:.7}
+    .btns a{display:inline-block;margin-right:10px;border:1px solid #444;border-radius:8px;padding:6px 10px;text-decoration:none}
+    .btns a:hover{border-color:#ddd}
+    .add{margin:20px 0;padding:12px;border:1px dashed #444;border-radius:12px}
+    code{background:#111;padding:2px 4px;border-radius:4px}
+    .warn{opacity:.8}
   </style>
 </head>
 <body>
-  <main>
-    <h1 id="titre">saveforascream</h1>
-    <div id="menu" style="opacity: 0; transition: opacity 0.6s; margin-top: 2rem;">
-      <a href="#a-propos">à propos</a><br>
-      <a href="#experiences">expériences</a><br>
-      <a href="#journal">journal</a><br>
-      <a href="#contact">contact</a>
+  <div class="wrap">
+    <h1>saveforascream — admin</h1>
+    <p class="warn">Cette page lit <code>content/index.json</code>. Clique “ouvrir”, “éditer contenu”, “éditer l’index”.</p>
+
+    <div id="lists">Chargement…</div>
+
+    <div class="add">
+      <h3>+ Ajouter un contenu</h3>
+      <ol>
+        <li>Duplique un fichier modèle (ex: <code>/experiences/la-perle.html</code>) et renomme-le.</li>
+        <li>Ajoute l’entrée correspondante dans <code>content/index.json</code> (titre, date, chemin…)</li>
+        <li>Reviens ici et vérifie qu’il apparaît.</li>
+      </ol>
     </div>
-    <div id="journal-articles" style="display: none; margin-top: 2rem; text-align: left; max-width: 600px;">
-      <div style="margin-bottom: 2rem;">
-        <div class="entry-title" onclick="hideOtherEntries(this)">journal / entrée n°1</div>
-        <div class="entry-text" style="display: none;">Texte flottant, image absente. Quelque chose a eu lieu — ou va venir.</div>
-      </div>
-      <div style="margin-bottom: 2rem;">
-        <div class="entry-title" onclick="hideOtherEntries(this)">journal / entrée n°2</div>
-        <div class="entry-text" style="display: none;">Le silence dans les vidéos est plus parlant que les voix générées. L’IA halète mais ne dit rien.</div>
-      </div>
-      <div style="margin-bottom: 2rem;">
-        <div class="entry-title" onclick="hideOtherEntries(this)">journal / entrée n°3</div>
-        <div class="entry-text" style="display: none;">Chaque clic est une convocation, un écho. Une interface comme un esprit : instable.</div>
-      </div>
-    </div>
-    <div id="experiences-articles" style="display: none; margin-top: 2rem; text-align: left; max-width: 600px;">
-      <div style="margin-bottom: 2rem;">
-        <div class="entry-title" onclick="hideOtherEntries(this)">expérience / la perle</div>
-        <div class="entry-text" style="display: none;">Une boucle d’un geste, un gant jamais vraiment ôté. La vidéo tourne sans fin, comme une mémoire numérique suspendue.</div>
-      </div>
-      <div style="margin-bottom: 2rem;">
-        <div class="entry-title" onclick="hideOtherEntries(this)">expérience / the siberian jesus tape</div>
-        <div class="entry-text" style="display: none;">Une composition en dérive, fondée sur des itérations IA. Une prophétie gelée dans un flux sonore jamais résolu.</div>
-      </div>
-    </div>
-  </main>
+  </div>
+
   <script>
-    const titre = document.getElementById('titre');
-    const menu = document.getElementById('menu');
-    const links = document.querySelectorAll('#menu a');
+    // Détecte owner/repo pour le lien "éditer sur GitHub"
+    function detectRepo(){
+      // ex: https://username.github.io/reponame/...
+      const hostParts = location.hostname.split('.');
+      const owner = hostParts[0]; // username
+      const pathParts = location.pathname.split('/').filter(Boolean);
+      const repo = pathParts.length ? pathParts[0] : ''; // reponame
+      return { owner, repo };
+    }
+    const { owner, repo } = detectRepo();
+    const EDIT_BASE = (owner && repo)
+      ? `https://github.com/${owner}/${repo}/edit/main/`
+      : null; // si domaine perso, EDIT_BASE sera null -> on n'affiche pas "éditer"
 
-    titre.addEventListener('click', () => {
-      links.forEach(link => {
-        const x = Math.floor(Math.random() * (window.innerWidth - 100));
-        const y = Math.floor(Math.random() * (window.innerHeight - 30));
-        link.style.left = x + 'px';
-        link.style.top = y + 'px';
-        link.style.display = 'block';
-        link.classList.add('flash');
-        setTimeout(() => link.classList.remove('flash'), 300);
+    fetch('content/index.json?_=' + Date.now())
+      .then(r => r.json())
+      .then(data => renderLists(data))
+      .catch(err => {
+        document.getElementById('lists').innerHTML =
+          "<p>Impossible de charger <code>content/index.json</code>. Vérifie le chemin.</p>";
+        console.error(err);
       });
-      const sections = document.querySelectorAll('#journal-articles, #experiences-articles');
-      sections.forEach(section => section.style.display = 'none');
-      menu.style.opacity = '1';
-      titre.textContent = 'saveforascream';
-      titre.classList.add('flash');
-      setTimeout(() => titre.classList.remove('flash'), 300);
-    });
 
-    links.forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
-        const href = link.getAttribute('href');
-        const rubrique = link.textContent;
-        titre.textContent = rubrique;
-        menu.style.opacity = '0';
-        links.forEach(l => l.style.display = 'none');
+    function renderLists(data){
+      const sections = ['experiences','journal'];
+      const container = document.getElementById('lists');
+      container.innerHTML = '';
+      sections.forEach(section=>{
+        const items = (data[section]||[]).slice()
+          .sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+        const sec = document.createElement('div');
+        sec.innerHTML = `<h2>${section}</h2>`;
+        const grid = document.createElement('div');
+        grid.className = 'grid';
+        items.forEach(item=>{
+          const viewHref = item.path.endsWith('.html') ? item.path : item.path.replace(/\.md$/i, '.html');
+          const editHref = EDIT_BASE ? (EDIT_BASE + item.path) : null;
+          const editIndexHref = EDIT_BASE ? (EDIT_BASE + 'content/index.json') : null;
 
-        let entries = [];
-        let contents = [];
-
-        if (href === '#journal') {
-          entries = document.querySelectorAll('#journal-articles .entry-title');
-          contents = document.querySelectorAll('#journal-articles .entry-text');
-          document.getElementById('journal-articles').style.display = 'block';
-          document.getElementById('experiences-articles').style.display = 'none';
-        }
-
-        if (href === '#experiences') {
-          entries = document.querySelectorAll('#experiences-articles .entry-title');
-          contents = document.querySelectorAll('#experiences-articles .entry-text');
-          document.getElementById('experiences-articles').style.display = 'block';
-          document.getElementById('journal-articles').style.display = 'none';
-        }
-
-        entries.forEach(entry => {
-          const x = Math.floor(Math.random() * (window.innerWidth - 300));
-          const y = Math.floor(Math.random() * (window.innerHeight - 50));
-          entry.style.position = 'absolute';
-          entry.style.left = x + 'px';
-          entry.style.top = y + 'px';
-          entry.style.display = 'block';
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <div class="tag">${item.date || ''}</div>
+            <h3 style="margin:6px 0 10px">${item.title}</h3>
+            <p style="opacity:.8">${item.summary || ''}</p>
+            <div class="btns" style="margin-top:12px">
+              <a href="${viewHref}" target="_blank">ouvrir</a>
+              ${editHref ? `<a href="${editHref}" target="_blank">éditer contenu</a>` : ''}
+              ${editIndexHref ? `<a href="${editIndexHref}" target="_blank">éditer l’index</a>` : ''}
+            </div>`;
+          grid.appendChild(card);
         });
-
-        contents.forEach(content => content.style.display = 'none');
+        sec.appendChild(grid);
+        container.appendChild(sec);
       });
-    });
-
-    function hideOtherEntries(clicked) {
-      const content = clicked.nextElementSibling;
-      if (content && content.style.display === 'none') {
-        content.style.display = 'block';
-      } else if (content) {
-        content.style.display = 'none';
-      }
-
-      // Retour à l'accueil
-      titre.textContent = 'saveforascream';
-      menu.style.opacity = '1';
-      links.forEach(link => {
-        const x = Math.floor(Math.random() * (window.innerWidth - 100));
-        const y = Math.floor(Math.random() * (window.innerHeight - 30));
-        link.style.left = x + 'px';
-        link.style.top = y + 'px';
-        link.style.display = 'block';
-        link.classList.add('flash');
-        setTimeout(() => link.classList.remove('flash'), 300);
-      });
-      const sections = document.querySelectorAll('#journal-articles, #experiences-articles');
-      sections.forEach(section => section.style.display = 'none');
     }
   </script>
 </body>
 </html>
-
-
