@@ -20,22 +20,24 @@
       cursor:pointer; user-select:none;
     }
 
-    /* Zone qui contiendra la LIGNE d’entrées */
+    /* Zone des entrées (rangée horizontale) */
     #cloud{ position:relative; width:100vw; height:100vh; pointer-events:none; }
     #row{
-      position:absolute; left:50%; transform:translateX(-50%);
+      position:absolute; left:0; top:0;           /* on pilotera left/top en JS */
       display:flex; align-items:center; gap:var(--gap,28px);
-      white-space:nowrap; /* tout sur une seule ligne */
-      pointer-events:auto; /* permet les clics sur .entry */
+      white-space:nowrap; pointer-events:auto;     /* clics actifs sur .entry */
+      visibility:hidden; opacity:0; transition:opacity .2s ease;
     }
+    #row.shown{ visibility:visible; opacity:1; }
 
-    /* Entrées (liens) */
+    /* Entrées */
     .entry{
       font-family:inherit;
-      font-size:clamp(13px,1.8vw,18px); /* plus petit que le titre central */
+      font-size:clamp(12px,1.6vw,16px);  /* plus petit que le titre central */
       color:var(--fg);
+      white-space:nowrap;                 /* une seule ligne */
       opacity:.95;
-      transition:color .25s ease, opacity .2s ease, transform .4s ease;
+      transition:color .25s ease, opacity .2s ease;
       padding:.1rem .2rem;
     }
     .entry:hover{ opacity:1; }
@@ -46,7 +48,6 @@
       100%{color:var(--fg);}
     }
 
-    .hidden{ opacity:0; pointer-events:none; }
     .admin{ position:fixed; right:14px; bottom:10px; font-size:12px; color:var(--muted) }
   </style>
 </head>
@@ -54,79 +55,78 @@
   <div id="titre">saveforascream</div>
 
   <div id="cloud" aria-live="polite">
-    <!-- rangée horizontale injectée en JS -->
-    <div id="row" class="hidden"></div>
+    <div id="row"></div>
   </div>
 
   <a class="admin" href="admin.html">admin</a>
 
   <script>
-    // --------- CONFIG ---------
     const JSON_PATH = 'content/index.json';
-
-    // --------- ÉTAT ---------
-    let ENTRIES = [];
-    let shown = false;
-
     const titre = document.getElementById('titre');
-    const cloud = document.getElementById('cloud');
     const row   = document.getElementById('row');
 
-    // charge la liste
+    // Charger les entrées et construire la ligne
     fetch(JSON_PATH + '?_=' + Date.now())
       .then(r => r.json())
       .then(list => {
-        ENTRIES = list.slice();        // pas de tri date : ordre tel que dans le JSON
-        buildRow();
+        row.innerHTML = '';
+        list.forEach(it => {
+          const a = document.createElement('a');
+          a.className = 'entry';
+          a.textContent = it.title;
+          a.href = it.path;
+          a.target = '_self';
+          row.appendChild(a);
+        });
+        // première position
+        repositionRow(true);
       })
       .catch(() => {
         row.innerHTML = `<span class="entry">Impossible de charger <code>${JSON_PATH}</code></span>`;
       });
 
-    // construit la rangée d’entrées
-    function buildRow(){
-      row.innerHTML = '';
-      ENTRIES.forEach((it) => {
-        const a = document.createElement('a');
-        a.className = 'entry';
-        a.textContent = it.title;
-        a.href = it.path;        // clic ouvre la page
-        a.target = '_self';
-        row.appendChild(a);
-      });
-      // au départ : caché
-      row.classList.add('hidden');
-    }
-
-    // mélange l’ordre + repositionne la rangée
-    function shuffleAndReposition(){
-      // 1) mélange l’ordre des enfants
-      const children = Array.from(row.children);
-      children.sort(() => Math.random() - 0.5).forEach(ch => row.appendChild(ch));
-
-      // 2) nouvelle hauteur (ligne horizontale) entre 60% et 85% de la hauteur
+    // Repositionner la rangée horizontalement + verticalement
+    function repositionRow(initial=false){
+      // garantir que le layout est à jour
+      const W = window.innerWidth;
       const H = window.innerHeight;
-      const y = rand(H * 0.60, H * 0.85);
-      row.style.top = `${y}px`;
 
-      // 3) gap aléatoire entre items
+      // largeur actuelle de la rangée (tout sur une ligne)
+      const rect = row.getBoundingClientRect();
+      const rowW = rect.width || 0;
+      const margin = 16;
+
+      // bornes horizontales (éviter de sortir de l'écran)
+      const minX = margin;
+      const maxX = Math.max(minX, W - rowW - margin);
+      const x = rand(minX, maxX);
+
+      // hauteur aléatoire entre 60% et 85% de l'écran
+      const y = rand(H * 0.60, H * 0.85);
+
+      row.style.left = `${x}px`;
+      row.style.top  = `${y}px`;
+
+      // espacement variable entre éléments
       const gap = Math.round(rand(16, 44));
       row.style.setProperty('--gap', `${gap}px`);
+
+      // montrer la rangée si nécessaire
+      if (initial) row.classList.add('shown');
     }
 
-    // helpers
-    function rand(min, max){ return Math.random() * (max - min) + min; }
+    function rand(min,max){ return Math.random() * (max - min) + min; }
 
-    // clic sur le titre central
+    // Clic sur le titre : afficher (si caché) + repositionner à chaque clic
     titre.addEventListener('click', () => {
-      shown = !shown || row.classList.contains('hidden') ? true : true; // on garde affiché
-      row.classList.remove('hidden');        // afficher
-      shuffleAndReposition();                // et repositionner à chaque clic
+      row.classList.add('shown');   // assure l'affichage
+      // (re)mesurer après un frame si la largeur change à la première ouverture
+      requestAnimationFrame(() => repositionRow(false));
     });
 
-    // au redimensionnement : garder la ligne à une position valide
+    // Repositionner aussi si la fenêtre change de taille
     window.addEventListener('resize', () => {
-      if (!row.classList.contains('hidden')) shuffleAndReposition();
+      if (row.classList.contains('shown')) repositionRow(false);
     });
   </script>
 </body>
