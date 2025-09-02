@@ -5,37 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>saveforascream</title>
   <style>
-    :root{ --bg:#000; --fg:#ddd; --muted:#a8a8a8; --line:#2a2a2a; }
+    :root{ --bg:#000; --fg:#ddd; --muted:#a8a8a8; }
     html,body{
       height:100%; margin:0; background:var(--bg); color:var(--fg);
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace; overflow:hidden
     }
     a{ color:var(--fg); text-decoration:none }
 
-    /* Titre centré */
+    /* Titre central */
     #titre{
       position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
-      font-size:clamp(28px,6vw,64px); letter-spacing:.02em; white-space:nowrap;
+      font-size:clamp(28px,6vw,64px);
+      letter-spacing:.02em; white-space:nowrap;
       cursor:pointer; user-select:none;
     }
 
     #cloud{ position:relative; width:100vw; height:100vh; pointer-events:none; }
 
-    /* ENTRÉES — homogénéisées avec le titre */
+    /* Entrées */
     .entry{
       position:absolute;
-      font-family: inherit;                 /* même police que #titre */
-      font-size:clamp(22px,4.5vw,58px);     /* plus grand, presque comme #titre */
-      color:var(--fg);                      /* même couleur que #titre */
+      font-family:inherit;
+      font-size:clamp(14px,2.2vw,20px); /* plus petit */
+      color:var(--fg);
+      white-space:nowrap; /* jamais de retour à la ligne */
       opacity:.95;
-      transition: color .25s ease, opacity .25s ease, transform .5s ease;
-      pointer-events:auto; padding:.15rem .25rem; border-radius:.4rem;
-      text-decoration:none;                 /* pas de soulignement */
+      transition:color .25s ease, opacity .25s ease, transform .5s ease;
+      pointer-events:auto;
+      padding:.15rem .25rem;
     }
-    .entry:hover{ opacity:1; }              /* pas de soulignement au survol */
 
-    /* Flash discret plus clair au clic */
-    .entry:active{ animation: flash .28s ease; }
+    /* Flash clair au clic */
+    .entry:active{ animation: flash .25s ease; }
     @keyframes flash{
       0%   { color:var(--fg); }
       50%  { color:#fff; }
@@ -44,20 +45,18 @@
 
     .fade{ opacity:0 }
     .admin{ position:fixed; right:14px; bottom:10px; font-size:12px; color:var(--muted) }
-    @media (max-width:520px){ }
   </style>
 </head>
 <body>
-  <div id="titre" aria-label="afficher les entrées">saveforascream</div>
-  <div id="cloud" aria-live="polite"></div>
+  <div id="titre">saveforascream</div>
+  <div id="cloud"></div>
   <a class="admin" href="admin.html">admin</a>
 
   <script>
     // --------- CONFIG ---------
-    const JSON_PATH = 'content/index.json'; // liste plate d’entrées
-    const MARGIN = 32;        // marge intérieure
-    const AVOID_RADIUS = 140; // zone à éviter autour du titre (px)
-    const SHUFFLE_ON = 'none';// aucune réorganisation automatique
+    const JSON_PATH = 'content/index.json';
+    const MARGIN = 32;
+    const AVOID_RADIUS = 140;
 
     // --------- ÉTAT ---------
     let ENTRIES = [];
@@ -83,14 +82,8 @@
         const a = document.createElement('a');
         a.className = 'entry fade';
         a.textContent = it.title;
-        a.href = it.path;
-        a.setAttribute('data-idx', idx);
+        a.href = it.path; // clic ouvre la page
         a.target = '_self';
-        a.addEventListener('click', () => {
-          if (SHUFFLE_ON === 'entry' || SHUFFLE_ON === 'both'){
-            setTimeout(shufflePositions, 0);
-          }
-        });
         cloud.appendChild(a);
       });
       positionEntries(true);
@@ -127,7 +120,7 @@
       const entries = document.querySelectorAll('.entry');
       if (shown){
         entries.forEach(el => el.classList.remove('fade'));
-        if (SHUFFLE_ON === 'title' || SHUFFLE_ON === 'both') shufflePositions();
+        shufflePositions(); // réarrange directement
       }else{
         entries.forEach(el => el.classList.add('fade'));
       }
@@ -137,12 +130,10 @@
     function rand(min, max){ return Math.random() * (max - min) + min; }
     function dist(x1,y1,x2,y2){ return Math.hypot(x2-x1, y2-y1); }
 
+    // Clic sur saveforascream → toggle + reposition
     titre.addEventListener('click', () => {
       if (!shown){ toggleShow(); }
-      else{
-        if (SHUFFLE_ON === 'title' || SHUFFLE_ON === 'both') shufflePositions();
-        else toggleShow();
-      }
+      else{ shufflePositions(); }
     });
 
     window.addEventListener('resize', () => {
