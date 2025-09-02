@@ -1,5 +1,6 @@
 [
-  { "title": "la perle", "path": "works/la-perle/" },
-  { "title": "the siberian jesus tape", "path": "works/siberian-jesus/" },
-  { "title": "journal_001", "path": "journal/001/" }
+  {
+    "title": "All I Had to Do Was Wait",
+    "path": "all-i-had-to-do-was-wait/"
+  }
 ]
