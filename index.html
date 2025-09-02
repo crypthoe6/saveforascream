@@ -20,22 +20,22 @@
       cursor:pointer; user-select:none;
     }
 
-    /* Zone des entrées (rangée horizontale) */
-    #cloud{ position:relative; width:100vw; height:100vh; pointer-events:none; }
+    /* Rangée horizontale des entrées */
     #row{
-      position:absolute; left:0; top:0;           /* on pilotera left/top en JS */
+      position:fixed; left:0; top:0;
       display:flex; align-items:center; gap:var(--gap,28px);
-      white-space:nowrap; pointer-events:auto;     /* clics actifs sur .entry */
+      white-space:nowrap; pointer-events:auto;
       visibility:hidden; opacity:0; transition:opacity .2s ease;
+      transform:translate(0,0); /* sera mis à jour en JS */
     }
     #row.shown{ visibility:visible; opacity:1; }
 
     /* Entrées */
     .entry{
       font-family:inherit;
-      font-size:clamp(12px,1.6vw,16px);  /* plus petit que le titre central */
+      font-size:clamp(12px,1.6vw,16px);  /* petite taille, une seule ligne */
       color:var(--fg);
-      white-space:nowrap;                 /* une seule ligne */
+      white-space:nowrap;
       opacity:.95;
       transition:color .25s ease, opacity .2s ease;
       padding:.1rem .2rem;
@@ -54,9 +54,8 @@
 <body>
   <div id="titre">saveforascream</div>
 
-  <div id="cloud" aria-live="polite">
-    <div id="row"></div>
-  </div>
+  <!-- rangée horizontale injectée en JS -->
+  <div id="row" aria-live="polite"></div>
 
   <a class="admin" href="admin.html">admin</a>
 
@@ -65,7 +64,7 @@
     const titre = document.getElementById('titre');
     const row   = document.getElementById('row');
 
-    // Charger les entrées et construire la ligne
+    // Charge et construit
     fetch(JSON_PATH + '?_=' + Date.now())
       .then(r => r.json())
       .then(list => {
@@ -78,55 +77,50 @@
           a.target = '_self';
           row.appendChild(a);
         });
-        // première position
-        repositionRow(true);
+        // première apparition
+        row.classList.add('shown');
+        repositionRow();
       })
       .catch(() => {
         row.innerHTML = `<span class="entry">Impossible de charger <code>${JSON_PATH}</code></span>`;
+        row.classList.add('shown');
+        repositionRow();
       });
 
-    // Repositionner la rangée horizontalement + verticalement
-    function repositionRow(initial=false){
-      // garantir que le layout est à jour
+    // Déplace la rangée à une position aléatoire (X/Y) et change l'espacement
+    function repositionRow(){
+      // largeur réelle de la rangée (même cachée)
+      const rowW = row.scrollWidth || 0;
       const W = window.innerWidth;
       const H = window.innerHeight;
-
-      // largeur actuelle de la rangée (tout sur une ligne)
-      const rect = row.getBoundingClientRect();
-      const rowW = rect.width || 0;
       const margin = 16;
 
-      // bornes horizontales (éviter de sortir de l'écran)
-      const minX = margin;
-      const maxX = Math.max(minX, W - rowW - margin);
-      const x = rand(minX, maxX);
+      // bornes horizontales pour éviter de sortir de l'écran
+      const maxX = Math.max(margin, W - rowW - margin);
+      const x = rand(margin, maxX);
 
-      // hauteur aléatoire entre 60% et 85% de l'écran
+      // hauteur entre 60% et 85% de l'écran
       const y = rand(H * 0.60, H * 0.85);
 
-      row.style.left = `${x}px`;
-      row.style.top  = `${y}px`;
+      row.style.transform = `translate(${x}px, ${y}px)`;
 
-      // espacement variable entre éléments
+      // espacement variable
       const gap = Math.round(rand(16, 44));
       row.style.setProperty('--gap', `${gap}px`);
-
-      // montrer la rangée si nécessaire
-      if (initial) row.classList.add('shown');
     }
 
     function rand(min,max){ return Math.random() * (max - min) + min; }
 
-    // Clic sur le titre : afficher (si caché) + repositionner à chaque clic
+    // Clic sur le titre → montre (si besoin) + repositionne à CHAQUE clic
     titre.addEventListener('click', () => {
-      row.classList.add('shown');   // assure l'affichage
-      // (re)mesurer après un frame si la largeur change à la première ouverture
-      requestAnimationFrame(() => repositionRow(false));
+      row.classList.add('shown');
+      // s'assurer que la largeur est à jour avant de bouger
+      requestAnimationFrame(repositionRow);
     });
 
-    // Repositionner aussi si la fenêtre change de taille
+    // Repositionner aussi au resize
     window.addEventListener('resize', () => {
-      if (row.classList.contains('shown')) repositionRow(false);
+      if (row.classList.contains('shown')) repositionRow();
     });
   </script>
 </body>
