@@ -9,13 +9,11 @@
     html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace; overflow:hidden}
     a{color:var(--fg);text-decoration:none}
-    /* Titre centré, fixe */
     #titre{
       position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
       font-size:clamp(28px,6vw,64px); letter-spacing:.02em; white-space:nowrap;
       cursor:pointer; user-select:none;
     }
-    /* Conteneur des entrées en positionnement libre */
     #cloud{position:relative; width:100vw; height:100vh; pointer-events:none;}
     .entry{
       position:absolute; font-size:clamp(14px,2.2vw,22px);
@@ -23,43 +21,35 @@
       pointer-events:auto; padding:.15rem .25rem; border-radius:.4rem;
     }
     .entry:hover{opacity:1; text-decoration:underline}
-    .hint{
-      position:fixed; left:50%; top:calc(50% + 3.6rem); transform:translateX(-50%);
-      font-size:12px; color:var(--muted); opacity:.9; user-select:none;
-      transition:opacity .3s ease;
-    }
     .fade{opacity:0}
-    /* Petit lien admin optionnel */
     .admin{position:fixed; right:14px; bottom:10px; font-size:12px; color:var(--muted)}
-    @media (max-width:520px){ .hint{top:calc(50% + 3rem)} }
+    @media (max-width:520px){ }
   </style>
 </head>
 <body>
   <div id="titre" aria-label="afficher les entrées">saveforascream</div>
   <div id="cloud" aria-live="polite"></div>
-  <div id="hint" class="hint">clique sur <em>saveforascream</em> pour faire apparaître / réarranger</div>
   <a class="admin" href="admin.html">admin</a>
 
   <script>
     // --------- CONFIG ---------
     const JSON_PATH = 'content/index.json'; // liste plate d’entrées
-    const MARGIN = 32;        // marge intérieure de l’écran pour placer les titres
+    const MARGIN = 32;        // marge intérieure
     const AVOID_RADIUS = 140; // zone à éviter autour du titre (px)
-    const SHUFFLE_ON = 'both';// 'title' (au clic sur titre), 'entry' (au clic entrée), 'both'
+    const SHUFFLE_ON = 'none';// aucune réorganisation automatique
 
     // --------- ÉTAT ---------
-    let ENTRIES = [];      // {title, path, date?, summary?}
+    let ENTRIES = [];
     let shown = false;
 
     const titre = document.getElementById('titre');
     const cloud = document.getElementById('cloud');
-    const hint  = document.getElementById('hint');
 
-    // Charger la liste
     fetch(JSON_PATH + '?_=' + Date.now())
       .then(r => r.json())
       .then(list => {
-        ENTRIES = list.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+        // aucune date nécessaire
+        ENTRIES = list.slice();
         buildCloud();
       })
       .catch(() => {
@@ -67,7 +57,6 @@
           Impossible de charger <code>${JSON_PATH}</code></div>`;
       });
 
-    // Construire les éléments cliquables
     function buildCloud(){
       cloud.innerHTML = '';
       ENTRIES.forEach((it, idx) => {
@@ -77,19 +66,16 @@
         a.href = it.path;
         a.setAttribute('data-idx', idx);
         a.target = '_self';
-        a.addEventListener('click', (e) => {
-          // laisser s’ouvrir le lien, mais aussi réarranger si demandé
+        a.addEventListener('click', () => {
           if (SHUFFLE_ON === 'entry' || SHUFFLE_ON === 'both'){
             setTimeout(shufflePositions, 0);
           }
         });
         cloud.appendChild(a);
       });
-      // première disposition cachée
       positionEntries(true);
     }
 
-    // Placement aléatoire avec évitement du centre
     function positionEntries(initial=false){
       const W = window.innerWidth, H = window.innerHeight;
       const cx = W/2, cy = H/2;
@@ -101,10 +87,8 @@
           x = rand(MARGIN, W - MARGIN);
           y = rand(MARGIN, H - MARGIN);
           tries++;
-          // éviter un disque autour du centre (titre)
         } while (dist(x, y, cx, cy) < AVOID_RADIUS && tries < 50);
 
-        // éviter que le texte sorte de l’écran
         const tw = Math.min(300, W - 2*MARGIN);
         el.style.maxWidth = tw + 'px';
         el.style.left = x + 'px';
@@ -114,39 +98,28 @@
       });
 
       if (initial){
-        // on laisse tout caché au départ
         entries.forEach(el => el.classList.add('fade'));
       }
     }
 
-    // Afficher / masquer + mélanger
     function toggleShow(){
       shown = !shown;
       const entries = document.querySelectorAll('.entry');
       if (shown){
         entries.forEach(el => el.classList.remove('fade'));
-        shufflePositions();
-        hint.textContent = 'clique à nouveau pour réarranger';
+        if (SHUFFLE_ON === 'title' || SHUFFLE_ON === 'both') shufflePositions();
       }else{
         entries.forEach(el => el.classList.add('fade'));
-        hint.textContent = 'clique sur saveforascream pour faire apparaître / réarranger';
       }
     }
 
-    function shufflePositions(){
-      // ne fait que réarranger (sans masquer)
-      positionEntries(false);
-    }
-
-    // Helpers
+    function shufflePositions(){ positionEntries(false); }
     function rand(min, max){ return Math.random() * (max - min) + min; }
     function dist(x1,y1,x2,y2){ return Math.hypot(x2-x1, y2-y1); }
 
-    // Événements
     titre.addEventListener('click', () => {
-      if (!shown){
-        toggleShow();
-      }else{
+      if (!shown){ toggleShow(); }
+      else{
         if (SHUFFLE_ON === 'title' || SHUFFLE_ON === 'both') shufflePositions();
         else toggleShow();
       }
