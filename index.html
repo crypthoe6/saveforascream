@@ -8,7 +8,7 @@
     :root{ --bg:#000; --fg:#ddd; --muted:#a8a8a8; }
     html,body{
       height:100%; margin:0; background:var(--bg); color:var(--fg);
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace; overflow:hidden
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace; overflow:hidden;
     }
     a{ color:var(--fg); text-decoration:none }
 
@@ -20,43 +20,49 @@
       cursor:pointer; user-select:none;
     }
 
+    /* Zone qui contiendra la LIGNE d’entrées */
     #cloud{ position:relative; width:100vw; height:100vh; pointer-events:none; }
+    #row{
+      position:absolute; left:50%; transform:translateX(-50%);
+      display:flex; align-items:center; gap:var(--gap,28px);
+      white-space:nowrap; /* tout sur une seule ligne */
+      pointer-events:auto; /* permet les clics sur .entry */
+    }
 
-    /* Entrées */
+    /* Entrées (liens) */
     .entry{
-      position:absolute;
       font-family:inherit;
-      font-size:clamp(14px,2.2vw,20px); /* plus petit */
+      font-size:clamp(13px,1.8vw,18px); /* plus petit que le titre central */
       color:var(--fg);
-      white-space:nowrap; /* jamais de retour à la ligne */
       opacity:.95;
-      transition:color .25s ease, opacity .25s ease, transform .5s ease;
-      pointer-events:auto;
-      padding:.15rem .25rem;
+      transition:color .25s ease, opacity .2s ease, transform .4s ease;
+      padding:.1rem .2rem;
     }
-
-    /* Flash clair au clic */
-    .entry:active{ animation: flash .25s ease; }
+    .entry:hover{ opacity:1; }
+    .entry:active{ animation:flash .25s ease; }
     @keyframes flash{
-      0%   { color:var(--fg); }
-      50%  { color:#fff; }
-      100% { color:var(--fg); }
+      0%{color:var(--fg);}
+      50%{color:#fff;}
+      100%{color:var(--fg);}
     }
 
-    .fade{ opacity:0 }
+    .hidden{ opacity:0; pointer-events:none; }
     .admin{ position:fixed; right:14px; bottom:10px; font-size:12px; color:var(--muted) }
   </style>
 </head>
 <body>
   <div id="titre">saveforascream</div>
-  <div id="cloud"></div>
+
+  <div id="cloud" aria-live="polite">
+    <!-- rangée horizontale injectée en JS -->
+    <div id="row" class="hidden"></div>
+  </div>
+
   <a class="admin" href="admin.html">admin</a>
 
   <script>
     // --------- CONFIG ---------
     const JSON_PATH = 'content/index.json';
-    const MARGIN = 32;
-    const AVOID_RADIUS = 140;
 
     // --------- ÉTAT ---------
     let ENTRIES = [];
@@ -64,80 +70,63 @@
 
     const titre = document.getElementById('titre');
     const cloud = document.getElementById('cloud');
+    const row   = document.getElementById('row');
 
+    // charge la liste
     fetch(JSON_PATH + '?_=' + Date.now())
       .then(r => r.json())
       .then(list => {
-        ENTRIES = list.slice();
-        buildCloud();
+        ENTRIES = list.slice();        // pas de tri date : ordre tel que dans le JSON
+        buildRow();
       })
       .catch(() => {
-        cloud.innerHTML = `<div class="entry" style="left:50%;top:50%;transform:translate(-50%,-50%)">
-          Impossible de charger <code>${JSON_PATH}</code></div>`;
+        row.innerHTML = `<span class="entry">Impossible de charger <code>${JSON_PATH}</code></span>`;
       });
 
-    function buildCloud(){
-      cloud.innerHTML = '';
-      ENTRIES.forEach((it, idx) => {
+    // construit la rangée d’entrées
+    function buildRow(){
+      row.innerHTML = '';
+      ENTRIES.forEach((it) => {
         const a = document.createElement('a');
-        a.className = 'entry fade';
+        a.className = 'entry';
         a.textContent = it.title;
-        a.href = it.path; // clic ouvre la page
+        a.href = it.path;        // clic ouvre la page
         a.target = '_self';
-        cloud.appendChild(a);
+        row.appendChild(a);
       });
-      positionEntries(true);
+      // au départ : caché
+      row.classList.add('hidden');
     }
 
-    function positionEntries(initial=false){
-      const W = window.innerWidth, H = window.innerHeight;
-      const cx = W/2, cy = H/2;
-      const entries = [...document.querySelectorAll('.entry')];
+    // mélange l’ordre + repositionne la rangée
+    function shuffleAndReposition(){
+      // 1) mélange l’ordre des enfants
+      const children = Array.from(row.children);
+      children.sort(() => Math.random() - 0.5).forEach(ch => row.appendChild(ch));
 
-      entries.forEach(el => {
-        let x, y, tries = 0;
-        do{
-          x = rand(MARGIN, W - MARGIN);
-          y = rand(MARGIN, H - MARGIN);
-          tries++;
-        } while (dist(x, y, cx, cy) < AVOID_RADIUS && tries < 50);
+      // 2) nouvelle hauteur (ligne horizontale) entre 60% et 85% de la hauteur
+      const H = window.innerHeight;
+      const y = rand(H * 0.60, H * 0.85);
+      row.style.top = `${y}px`;
 
-        const tw = Math.min(300, W - 2*MARGIN);
-        el.style.maxWidth = tw + 'px';
-        el.style.left = x + 'px';
-        el.style.top  = y + 'px';
-
-        if (!initial) el.classList.remove('fade');
-      });
-
-      if (initial){
-        entries.forEach(el => el.classList.add('fade'));
-      }
+      // 3) gap aléatoire entre items
+      const gap = Math.round(rand(16, 44));
+      row.style.setProperty('--gap', `${gap}px`);
     }
 
-    function toggleShow(){
-      shown = !shown;
-      const entries = document.querySelectorAll('.entry');
-      if (shown){
-        entries.forEach(el => el.classList.remove('fade'));
-        shufflePositions(); // réarrange directement
-      }else{
-        entries.forEach(el => el.classList.add('fade'));
-      }
-    }
-
-    function shufflePositions(){ positionEntries(false); }
+    // helpers
     function rand(min, max){ return Math.random() * (max - min) + min; }
-    function dist(x1,y1,x2,y2){ return Math.hypot(x2-x1, y2-y1); }
 
-    // Clic sur saveforascream → toggle + reposition
+    // clic sur le titre central
     titre.addEventListener('click', () => {
-      if (!shown){ toggleShow(); }
-      else{ shufflePositions(); }
+      shown = !shown || row.classList.contains('hidden') ? true : true; // on garde affiché
+      row.classList.remove('hidden');        // afficher
+      shuffleAndReposition();                // et repositionner à chaque clic
     });
 
+    // au redimensionnement : garder la ligne à une position valide
     window.addEventListener('resize', () => {
-      if (shown) shufflePositions(); else positionEntries(true);
+      if (!row.classList.contains('hidden')) shuffleAndReposition();
     });
   </script>
 </body>
