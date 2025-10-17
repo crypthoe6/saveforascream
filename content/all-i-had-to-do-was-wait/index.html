@@ -5,21 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>All I Had to Do Was Wait</title>
   <style>
-    :root{ --bg:#000; --fg:#ddd; --muted:#aaa; }
+    :root{
+      --bg:#000;
+      --fg:#ddd;
+      --muted:#aaa;
+    }
+
     html,body{
-      margin:0; background:var(--bg); color:var(--fg);
+      margin:0;
+      background:var(--bg);
+      color:var(--fg);
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     }
-    main{ max-width:880px; margin:40px auto; padding:0 20px; }
-    a{ color:var(--fg); text-decoration:none; }
-    h1{ font-size:clamp(22px,4vw,40px); margin:1.5rem 0 1rem; }
+
+    main{
+      max-width:880px;
+      margin:40px auto;
+      padding:0 20px;
+    }
+
+    a{
+      color:var(--fg);
+      text-decoration:none;
+    }
+
+    h1{
+      font-size:clamp(22px,4vw,40px);
+      margin:1.5rem 0 1rem;
+    }
+
     h2{
       margin-top:2.5rem;
       font-size:clamp(18px,3vw,28px);
       color:#eee;
       font-weight:normal;
+      transition:color .6s ease, text-shadow .6s ease;
     }
-    p{ line-height:1.7; margin:1rem 0; text-align:justify; }
+    h2:hover{
+      color:#fff;
+      text-shadow:0 0 8px rgba(255,255,255,0.06);
+    }
+
+    /* Texte spectral : légèrement estompé, halo au survol */
+    p{
+      line-height:1.7;
+      margin:1rem 0;
+      text-align:justify;
+      opacity:.82;
+      transition:opacity .6s ease, color .6s ease, text-shadow .6s ease;
+    }
+    p:hover{
+      opacity:1;
+      color:#eee;
+      text-shadow:0 0 8px rgba(255,255,255,0.05);
+    }
 
     /* Figures */
     figure{
@@ -27,37 +66,47 @@
       margin:2.5rem 0;
       overflow:hidden;
     }
-    img{
+
+    /* Image : léger dim au survol */
+    figure img{
       width:100%;
       height:auto;
       display:block;
       background:#111;
-      transition: opacity .4s ease-in-out;
+      transition: transform .35s ease, opacity .35s ease;
+    }
+    figure:hover img{
+      opacity:.96;
     }
 
-    /* Figcaption en survol */
+    /* Figcaption : pastille discrète en bas-droite */
     figcaption{
       position:absolute;
-      bottom:0;
-      left:0;
-      width:100%;
-      padding:1rem;
-      background:rgba(0,0,0,0.65);
-      color:var(--muted);
-      font-size:13px;
+      right:.6rem;
+      bottom:.6rem;
+      max-width:78%;
+      padding:.45rem .6rem;
+      background:rgba(0,0,0,.5);
+      backdrop-filter: blur(2px);
+      color:#bdbdbd;
+      font-size:12px;
+      line-height:1.4;
+      border-radius:8px;
       opacity:0;
-      transform:translateY(10px);
-      transition:all .4s ease-in-out;
-      text-align:left;
+      transform:translateY(4px);
+      transition:opacity .25s ease, transform .25s ease;
     }
     figure:hover figcaption{
       opacity:1;
       transform:translateY(0);
     }
 
-    figure + figure { margin-top: 3rem; }
+    figure + figure{
+      margin-top:3rem;
+    }
   </style>
 </head>
+
 <body>
   <main>
 
