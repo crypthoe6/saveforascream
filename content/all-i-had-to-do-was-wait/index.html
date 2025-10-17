@@ -16,13 +16,46 @@
     h2{
       margin-top:2.5rem;
       font-size:clamp(18px,3vw,28px);
-      color:#eee;           /* plus clair */
-      font-weight:normal;   /* moins gras */
+      color:#eee;
+      font-weight:normal;
     }
     p{ line-height:1.7; margin:1rem 0; text-align:justify; }
-    figure{ margin:2rem 0; }
-    figcaption{ font-size:12px; color:var(--muted); margin-top:.4rem; }
-    img, video{ width:100%; height:auto; display:block; background:#111; }
+
+    /* Figures */
+    figure{
+      position:relative;
+      margin:2.5rem 0;
+      overflow:hidden;
+    }
+    img{
+      width:100%;
+      height:auto;
+      display:block;
+      background:#111;
+      transition: opacity .4s ease-in-out;
+    }
+
+    /* Figcaption en survol */
+    figcaption{
+      position:absolute;
+      bottom:0;
+      left:0;
+      width:100%;
+      padding:1rem;
+      background:rgba(0,0,0,0.65);
+      color:var(--muted);
+      font-size:13px;
+      opacity:0;
+      transform:translateY(10px);
+      transition:all .4s ease-in-out;
+      text-align:left;
+    }
+    figure:hover figcaption{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    figure + figure { margin-top: 3rem; }
   </style>
 </head>
 <body>
@@ -44,6 +77,11 @@
       un état d’instabilité formelle. Les figures se déforment, les plans se mêlent et le
       récit se dissout.
     </p>
+
+    <figure>
+      <img src="../assets/images/wait-01.png" alt="Still initial du plan de Jeff Bailey">
+      <figcaption>Image d’origine extraite du plan fixe — Jeff Bailey attendant seul dans le café La Mar Azul.</figcaption>
+    </figure>
 
     <p>
       Ce geste vise moins à produire une fiction alternative qu’à révéler la logique interne
@@ -72,6 +110,11 @@
       jamais ? Et si le film tout entier n’était plus qu’une attente vide ?
     </p>
 
+    <figure>
+      <img src="../assets/images/wait-03.png" alt="Itération médiane du processus de liquéfaction">
+      <figcaption>Itération médiane — le visage et le décor commencent à se fondre, la temporalité se dilate.</figcaption>
+    </figure>
+
     <p>
       Ce fragment de huit secondes concentre une attente qui menace de devenir infinie. De
       plus, le décor où Jeff Bailey attend – une reconstitution artificielle du RKO Encino
@@ -88,6 +131,11 @@
       open-source, chaque sortie du modèle devenait l’entrée suivante. L’algorithme était
       ainsi forcé de se nourrir de ses propres dérives sans stabilisation extérieure.
     </p>
+
+    <figure>
+      <img src="../assets/images/wait-04.png" alt="Liquéfaction avancée du plan">
+      <figcaption>Itération avancée — la distinction entre figure et décor disparaît, l’image devient flux.</figcaption>
+    </figure>
 
     <p>
       La liquéfaction devient alors un processus critique : l’image se défait progressivement
@@ -112,6 +160,11 @@
       propre perte. L’image ne se déconstruit pas narrativement mais s’érode depuis
       l’intérieur.
     </p>
+
+    <figure>
+      <img src="../assets/images/wait-02.png" alt="Résidu final du processus">
+      <figcaption>Résidu final — effacement presque total de la scène, persistance d’une trace sans forme.</figcaption>
+    </figure>
 
     <h2>L’algorithme sans horizon</h2>
 
