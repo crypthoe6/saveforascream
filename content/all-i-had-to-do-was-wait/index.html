@@ -274,22 +274,27 @@ h1:hover, h2:hover {
     </p>
 
   </main>
+    </main>
+
   <script>
   /*
-  Effet spectral :
-  - Paragraphes ET titres disparaissent doucement au scroll,
-  - réapparaissent progressivement au survol.
+  Effet spectral complet :
+  - Paragraphes ET titres disparaissent doucement au scroll
+  - réapparaissent lentement au survol
+  - reviennent aussi quand ils rentrent à nouveau dans le champ
   */
+
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       const ratio = entry.intersectionRatio;
       entry.target.style.setProperty('--fade', ratio.toFixed(2));
     });
   }, {
-    threshold: Array.from({length: 20}, (_, i) => i / 20)
+    // seuils de détection fins (0 -> 1 en 0.05)
+    threshold: Array.from({length: 21}, (_, i) => i / 20)
   });
 
-  // Appliquer l'effet à tous les paragraphes et titres
+  // cibler paragraphes + titres
   document.querySelectorAll('p, h1, h2').forEach(el => {
     el.setAttribute('data-fade', '');
     observer.observe(el);
