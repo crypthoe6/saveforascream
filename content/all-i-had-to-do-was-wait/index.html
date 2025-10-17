@@ -295,10 +295,7 @@ h1:hover, h2:hover, h3:hover {
   });
 
   // cibler paragraphes + titres
-  document.querySelectorAll('p, h1, h2').forEach(el => {
-    el.setAttribute('data-fade', '');
-    observer.observe(el);
-  });
-  </script>
-</body>
-</html>
+  document.querySelectorAll('p, h1, h2, h3').forEach(el => {
+  el.setAttribute('data-fade', '');
+  observer.observe(el);
+});
