@@ -108,6 +108,21 @@
   figure + figure{
     margin-top:2.6rem;
   }
+  /* Disparition progressive au scroll + réapparition au survol */
+p {
+  opacity: 1;
+  transition: opacity 1s ease, color 1s ease;
+}
+
+p[data-fade] {
+  opacity: var(--fade, 1);
+}
+
+/* réapparition progressive quand on survole */
+p:hover {
+  opacity: 1 !important;
+  color: #eee;
+}
 </style>
 </head>
 
