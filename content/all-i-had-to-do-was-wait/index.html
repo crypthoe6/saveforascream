@@ -292,5 +292,28 @@ document.querySelectorAll('p').forEach(p => {
   observer.observe(p);
 });
 </script>
+  <script>
+/*
+Effet spectral :
+- Paragraphes et titres disparaissent doucement au scroll,
+- reviennent progressivement au survol.
+*/
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    const ratio = entry.intersectionRatio;
+    // plus l'élément est visible, plus il reste opaque
+    entry.target.style.setProperty('--fade', ratio.toFixed(2));
+  });
+}, {
+  threshold: Array.from({length: 20}, (_, i) => i / 20) // détection fine entre 0 et 1
+});
+
+// On applique l'effet à tous les paragraphes et titres
+document.querySelectorAll('p, h1, h2').forEach(el => {
+  el.setAttribute('data-fade', '');
+  observer.observe(el);
+});
+</script>
 </body>
 </html>
