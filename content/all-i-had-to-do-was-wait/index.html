@@ -123,6 +123,21 @@ p:hover {
   opacity: 1 !important;
   color: #eee;
 }
+  /* Disparition et réapparition spectrales pour les titres */
+h1, h2 {
+  opacity: 1;
+  transition: opacity 1s ease, color 1s ease;
+}
+
+h1[data-fade], h2[data-fade] {
+  opacity: var(--fade, 1);
+}
+
+/* Réapparition douce au survol */
+h1:hover, h2:hover {
+  opacity: 1 !important;
+  color: #fff;
+}
 </style>
 </head>
 
