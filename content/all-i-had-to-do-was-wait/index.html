@@ -259,5 +259,23 @@ p:hover {
     </p>
 
   </main>
+  <script>
+/*
+Effet spectral : les paragraphes disparaissent doucement
+au fur et à mesure du scroll, puis réapparaissent au survol.
+*/
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    const ratio = entry.intersectionRatio;
+    // plus un paragraphe quitte le champ, plus il s'efface
+    entry.target.style.setProperty('--fade', ratio.toFixed(2));
+  });
+}, { threshold: Array.from({length:20}, (_,i)=>i/20) });
+
+document.querySelectorAll('p').forEach(p => {
+  p.setAttribute('data-fade', '');
+  observer.observe(p);
+});
+</script>
 </body>
 </html>
