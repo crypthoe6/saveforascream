@@ -124,17 +124,17 @@ p:hover {
   color: #eee;
 }
   /* Disparition et réapparition spectrales pour les titres */
-h1, h2 {
+h1, h2, h3 {
   opacity: 1;
   transition: opacity 1s ease, color 1s ease;
 }
 
-h1[data-fade], h2[data-fade] {
+h1[data-fade], h2[data-fade], h3[data-fade] {
   opacity: var(--fade, 1);
 }
 
 /* Réapparition douce au survol */
-h1:hover, h2:hover {
+h1:hover, h2:hover, h3:hover {
   opacity: 1 !important;
   color: #fff;
 }
