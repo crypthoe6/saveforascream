@@ -10,7 +10,7 @@
     background:var(--bg);
     color:var(--fg);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size:14px; /* texte global un peu plus petit */
+    font-size:14px;
     animation: fadeInSpectral 1.6s ease-out both;
   }
 
@@ -32,7 +32,7 @@
 
   h1{
     font-size:clamp(20px,2.6vw,28px);
-    font-weight:500;           /* moins gras */
+    font-weight:500;
     letter-spacing:.02em;
     margin:1.2rem 0 .4rem;
   }
@@ -41,7 +41,7 @@
     margin-top:2.8rem;
     font-size:clamp(16px,2.4vw,22px);
     color:#ddd;
-    font-weight:400;           /* plus léger */
+    font-weight:400;
     letter-spacing:.015em;
     transition:color .6s ease, text-shadow .6s ease;
   }
@@ -79,30 +79,15 @@
     animation: fadeInSpectral 1.8s ease-out forwards;
     transition: transform .35s ease, opacity .35s ease;
   }
+
   figure:hover img{
     opacity:.96;
     transform:scale(1.005);
   }
 
+  /* ✅ LÉGENDES MASQUÉES */
   figcaption{
-    position:absolute;
-    right:.6rem;
-    bottom:.6rem;
-    max-width:78%;
-    padding:.4rem .6rem;
-    background:rgba(0,0,0,.5);
-    backdrop-filter: blur(2px);
-    color:#bdbdbd;
-    font-size:11px;
-    line-height:1.4;
-    border-radius:6px;
-    opacity:0;
-    transform:translateY(4px);
-    transition:opacity .25s ease, transform .25s ease;
-  }
-  figure:hover figcaption{
-    opacity:1;
-    transform:translateY(0);
+    display:none;
   }
 
   figure + figure{
@@ -119,13 +104,11 @@
     opacity: var(--fade, 1);
   }
 
-  /* réapparition progressive quand on survole */
   p:hover {
     opacity: 1 !important;
     color: #eee;
   }
 
-  /* Disparition et réapparition spectrales pour les titres */
   h1, h2, h3 {
     opacity: 1;
     transition: opacity 1s ease, color 1s ease;
@@ -135,7 +118,6 @@
     opacity: var(--fade, 1);
   }
 
-  /* Réapparition douce au survol */
   h1:hover, h2:hover, h3:hover {
     opacity: 1 !important;
     color: #fff;
@@ -145,10 +127,9 @@
 <main>
 
   <h1>
-    <a href="../../" style="color:inherit; text-decoration:none;">
-      All I Had to Do Was Wait
-    </a>
+    <a href="../../">All I Had to Do Was Wait</a>
   </h1>
+
   <p class="meta">2025</p>
 
   <p>
@@ -161,10 +142,8 @@
     récit se dissout.
   </p>
 
-  <figure>
-    <img src="../assets/images/wait-01.png" alt="Still initial du plan de Jeff Bailey">
-    <figcaption>Image d’origine extraite du plan fixe — Jeff Bailey attendant seul dans le café La Mar Azul.</figcaption>
-  </figure>
+  <!-- ✅ PREMIÈRE IMAGE SUPPRIMÉE -->
+
 
   <p>
     Ce geste vise moins à produire une fiction alternative qu’à exposer la logique interne
@@ -196,94 +175,27 @@
 
   <figure>
     <img src="../assets/images/wait-03.png" alt="Itération médiane du processus de liquéfaction">
-    <figcaption>Itération médiane — le visage et le décor commencent à se fondre, la temporalité se dilate.</figcaption>
   </figure>
-
-  <p>
-    Ce fragment de huit secondes concentre une attente qui menace de devenir infinie. De
-    plus, le décor où Jeff Bailey attend – une reconstitution artificielle du RKO Encino
-    Ranch, aujourd’hui disparu – inscrit déjà ce plan dans une condition spectralisée,
-    issue de couches techniques et de fictions de studio. Travailler à partir de ce décor
-    factice, c’est manipuler un objet fragile, voué à sa propre disparition davantage
-    qu’à une mémoire à restaurer.
-  </p>
 
   <h2>Détournement algorithmique : de la fluidité à la liquéfaction</h2>
 
-  <p>
-    J’ai soumis ce fragment filmique à la fonction <em>extend duration</em>, conçue pour
-    prolonger les séquences vidéo dans une logique de fluidité. En modifiant le script
-    open-source, chaque sortie du modèle devenait l’entrée suivante. L’algorithme était
-    ainsi forcé de se nourrir de ses propres dérives sans stabilisation extérieure.
-  </p>
-
   <figure>
     <img src="../assets/images/wait-04.png" alt="Liquéfaction avancée du plan">
-    <figcaption>Itération avancée — la distinction entre figure et décor disparaît, l’image devient flux.</figcaption>
   </figure>
-
-  <p>
-    La liquéfaction devient alors un processus critique : l’image se défait progressivement
-    de toute stabilité narrative et formelle. Privé de ses garde-fous, l’algorithme devient
-    une machine à dissoudre. Le décor absorbe les personnages, avant-plan et arrière-plan
-    se confondent, la perspective s’effondre.
-  </p>
 
   <h2>La trace numérique comme processus critique</h2>
 
-  <p>
-    Ici, la trace ne vise pas à conserver ni à restituer un passé : elle altère. Chaque
-    image prolonge la précédente sans jamais la fixer. La trace devient un passage, un
-    seuil mouvant. Les figures se fragmentent, les silhouettes se superposent, jusqu’à ce
-    que l’image perde toute cohérence. Ce n’est pas un glitch ni un accident visuel mais
-    une entropie programmée, un écoulement sans repère stable.
-  </p>
-
-  <p>
-    Cette plasticité engage une autre manière de regarder : une attention flottante, libre
-    de circuler. La logique prédictive excède son rôle et produit un espace habité par sa
-    propre perte. L’image ne se déconstruit pas narrativement mais s’érode depuis
-    l’intérieur du dispositif qui la génère.
-  </p>
-
   <figure>
     <img src="../assets/images/wait-02.png" alt="Résidu final du processus">
-    <figcaption>Résidu final — effacement presque total de la scène, persistance d’une trace sans forme.</figcaption>
   </figure>
-
-  <h2>L’algorithme sans horizon</h2>
-
-  <p>
-    La temporalité ainsi générée ne progresse plus. Elle se replie sur elle-même dans une
-    répétition sans issue. Chaque itération éloigne l’image d’un temps lisible pour faire
-    émerger une durée spectrale, impossible. Ce n’est plus une variation, mais un circuit
-    clos.
-  </p>
-
-  <p>
-    Cet épuisement temporel ne s’appuie pas sur la progression d’une action mais sur
-    l’érosion continue des signes. Le plan devient le lieu même de sa disparition. La
-    narration se délite, remplacée par des restes liquides, des formes en mutation où la
-    fiction se perd.
-  </p>
-
-  <p>
-    <em>All I Had to Do Was Wait</em> cherche à exposer cette dynamique : non pas la
-    fluidité, mais l’extinction. L’image persiste dans un état d’irrésolution suspendue. Ce
-    n’est pas un effondrement cognitif ni une spéculation fictionnelle : c’est une
-    condition contemporaine des traces, où la mémoire cesse d’être le modèle dominant et
-    où les formes demeurent surtout activables, recalculables, maintenues en circulation
-    dans le flux.
-  </p>
 
 </main>
 
 <script>
   /*
-    Effet spectral complet :
-    - Paragraphes ET titres disparaissent doucement au scroll
-    - réapparaissent lentement au survol
-    - reviennent aussi quand ils rentrent à nouveau dans le champ
+    Effet spectral :
+    - Paragraphes + titres disparaissent au scroll
+    - Réapparaissent au survol
   */
 
   const observer = new IntersectionObserver(entries => {
@@ -291,14 +203,12 @@
       const ratio = entry.intersectionRatio;
       entry.target.style.setProperty('--fade', ratio.toFixed(2));
     });
-  }, {
-    // seuils de détection fins (0 -> 1 en 0.05)
-    threshold: Array.from({length: 21}, (_, i) => i / 20)
+  },{
+    threshold: Array.from({length:21},(_,i)=>i/20)
   });
 
-  // cibler paragraphes + titres
   document.querySelectorAll('p, h1, h2, h3').forEach(el => {
-    el.setAttribute('data-fade', '');
+    el.setAttribute('data-fade','');
     observer.observe(el);
   });
 </script>
