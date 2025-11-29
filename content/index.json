@@ -1,6 +1,30 @@
 [
   {
-    "title": "all I Had to Do Was Wait",
+    "title": "All I Had to Do Was Wait",
     "path": "content/all-i-had-to-do-was-wait/"
+  },
+  {
+    "title": "BK’s 8th Chance",
+    "path": "content/bks-8th-chance/"
+  },
+  {
+    "title": "BLM1",
+    "path": "content/blm1/"
+  },
+  {
+    "title": "BLM2",
+    "path": "content/blm2/"
+  },
+  {
+    "title": "Dead Prayer Machine",
+    "path": "content/dead-prayer-machine/"
+  },
+  {
+    "title": "x_hausted",
+    "path": "content/x-hausted/"
+  },
+  {
+    "title": "Veille",
+    "path": "content/veille/"
   }
 ]
