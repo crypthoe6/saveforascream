@@ -30,14 +30,14 @@
       user-select:none;
     }
 
-    /* Zone plein écran qui contiendra les entrées */
+    /* Conteneur plein écran pour la "nébuleuse" de titres */
     #row{
       position:fixed;
       inset:0;
       pointer-events:auto;
       visibility:hidden;
       opacity:0;
-      transition:opacity .2s ease;
+      transition:opacity .25s ease;
     }
     #row.shown{ visibility:visible; opacity:1; }
 
@@ -46,10 +46,16 @@
       position:absolute;
       font-size:clamp(12px,1.6vw,16px);
       white-space:nowrap;
-      opacity:.95;
-      transition:color .25s ease, opacity .2s ease, transform .25s ease;
+      opacity:.92;
+      transition:
+        color .25s ease,
+        opacity .2s ease,
+        transform .25s ease;
+      padding:.1rem .2rem;
     }
-    .entry:hover{ opacity:1; }
+    .entry:hover{
+      opacity:1;
+    }
 
     .admin{
       position:fixed;
@@ -72,9 +78,9 @@
     const titre = document.getElementById('titre');
     const row   = document.getElementById('row');
 
-    let data = [];        // œuvres
-    let ready = false;    // json chargé ?
-    let shown = false;    // titres déjà visibles ?
+    let works = [];     // données index.json
+    let ready = false;  // JSON chargé
+    let shown = false;  // nébuleuse déjà affichée ?
 
     function rand(min,max){ return Math.random() * (max - min) + min; }
 
@@ -86,35 +92,39 @@
       return array;
     }
 
-    // place les titres à des positions aléatoires autour du titre central
+    // place les titres aléatoirement, tous à des hauteurs (y) distinctes
     function scatter(){
-      if (!data.length) return;
+      const entries = Array.from(row.children);
+      if (!entries.length) return;
 
       const W = window.innerWidth;
       const H = window.innerHeight;
       const margin = 24;
 
+      // zone interdite autour du titre central
       const tRect = titre.getBoundingClientRect();
-      const forbidPadding = 32; // zone interdite autour du titre
+      const pad = 32;
       const forbid = {
-        left:   tRect.left   - forbidPadding,
-        right:  tRect.right  + forbidPadding,
-        top:    tRect.top    - forbidPadding,
-        bottom: tRect.bottom + forbidPadding
+        left:   tRect.left   - pad,
+        right:  tRect.right  + pad,
+        top:    tRect.top    - pad,
+        bottom: tRect.bottom + pad
       };
 
-      // on mélange l'ordre
-      const entries = Array.from(row.children);
+      // ordre aléatoire
       shuffle(entries);
       entries.forEach(e => row.appendChild(e));
 
-      // pour chaque titre : tirage aléatoire jusqu'à sortir de la zone interdite
+      const usedY = [];
+      const minYSpacing = 28; // écart vertical minimum -> jamais sur la même ligne
+
       entries.forEach(el => {
         const w = el.offsetWidth || 80;
         const h = el.offsetHeight || 20;
 
         let x, y, tries = 0;
-        while(true){
+
+        while (true) {
           x = rand(margin, W - w - margin);
           y = rand(margin, H - h - margin);
 
@@ -123,24 +133,43 @@
           const top = y;
           const bottom = y + h;
 
-          const overlap =
+          // éviter la zone du titre
+          const overlapTitle =
             !(right < forbid.left ||
               left  > forbid.right ||
               bottom < forbid.top ||
               top > forbid.bottom);
 
-          if (!overlap || tries > 20) break;
-          tries++;
+          if (overlapTitle && tries < 20) {
+            tries++;
+            continue;
+          }
+
+          // éviter de retomber sur la "même ligne" qu'un autre titre
+          let tooClose = false;
+          for (const yUsed of usedY) {
+            if (Math.abs(y - yUsed) < minYSpacing) {
+              tooClose = true;
+              break;
+            }
+          }
+          if (tooClose && tries < 40) {
+            tries++;
+            continue;
+          }
+
+          // position acceptée
+          usedY.push(y);
+          break;
         }
 
         el.style.transform = `translate(${x}px, ${y}px)`;
       });
     }
 
-    // construit les liens une fois le JSON chargé
     function buildEntries(){
       row.innerHTML = '';
-      data.forEach(it => {
+      works.forEach(it => {
         const a = document.createElement('a');
         a.className = 'entry';
         a.textContent = it.title;
@@ -150,33 +179,32 @@
       });
     }
 
-    // clic sur le titre
+    // Clic sur le titre : fait apparaître / remélange la nébuleuse
     titre.addEventListener('click', () => {
-      if (!ready) return;        // si JSON pas encore chargé, on fait rien
+      if (!ready) return;
       if (!shown){
         buildEntries();
         row.classList.add('shown');
         shown = true;
       }
-      // attendre un frame pour être sûr d'avoir les tailles
       requestAnimationFrame(scatter);
     });
 
-    // au resize, on recalcule juste la dispersion si c'est visible
+    // Au resize, on recalcule la dispersion si elle est visible
     window.addEventListener('resize', () => {
       if (shown) scatter();
     });
 
-    // chargement des données
+    // Chargement des données depuis content/index.json
     fetch(JSON_PATH + '?_=' + Date.now())
       .then(r => r.json())
       .then(list => {
-        data = list;
+        works = list;
         ready = true;
       })
       .catch(() => {
-        data = [{ title: 'error loading index.json', path: '#' }];
-        ready = true;
+        works = [{ title: 'error loading index.json', path: '#' }];
+        ready  = true;
       });
   </script>
 </body>
