@@ -24,6 +24,14 @@
     "path": "content/x-hausted/"
   },
   {
+    "title": "x_hausted (1)",
+    "path": "content/x-hausted-1/"
+  },
+  {
+    "title": "x_hausted (2)",
+    "path": "content/x-hausted-2/"
+  },
+  {
     "title": "Veille",
     "path": "content/veille/"
   }
