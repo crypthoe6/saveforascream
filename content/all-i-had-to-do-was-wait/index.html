@@ -1,3 +1,147 @@
+<style>
+  :root{
+    --bg:#000;
+    --fg:#ccc;
+    --muted:#999;
+  }
+
+  html,body{
+    margin:0;
+    background:var(--bg);
+    color:var(--fg);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size:14px; /* texte global un peu plus petit */
+    animation: fadeInSpectral 1.6s ease-out both;
+  }
+
+  @keyframes fadeInSpectral {
+    from { opacity: 0; filter: blur(2px); }
+    to { opacity: 1; filter: blur(0); }
+  }
+
+  main{
+    max-width:680px;
+    margin:80px auto 120px;
+    padding:0 30px;
+  }
+
+  a{
+    color:var(--fg);
+    text-decoration:none;
+  }
+
+  h1{
+    font-size:clamp(20px,2.6vw,28px);
+    font-weight:500;           /* moins gras */
+    letter-spacing:.02em;
+    margin:1.2rem 0 .4rem;
+  }
+
+  h2{
+    margin-top:2.8rem;
+    font-size:clamp(16px,2.4vw,22px);
+    color:#ddd;
+    font-weight:400;           /* plus léger */
+    letter-spacing:.015em;
+    transition:color .6s ease, text-shadow .6s ease;
+  }
+  h2:hover{
+    color:#fff;
+    text-shadow:0 0 8px rgba(255,255,255,0.06);
+  }
+
+  p{
+    line-height:1.65;
+    margin:0.9rem 0;
+    text-align:justify;
+    opacity:.82;
+    transition:opacity .6s ease, color .6s ease, text-shadow .6s ease;
+  }
+  p:hover{
+    opacity:1;
+    color:#ddd;
+    text-shadow:0 0 6px rgba(255,255,255,0.04);
+  }
+
+  figure{
+    position:relative;
+    margin:2.8rem 0;
+    overflow:hidden;
+  }
+
+  figure img{
+    width:100%;
+    height:auto;
+    display:block;
+    background:#111;
+    opacity:0;
+    transform:scale(1.01);
+    animation: fadeInSpectral 1.8s ease-out forwards;
+    transition: transform .35s ease, opacity .35s ease;
+  }
+  figure:hover img{
+    opacity:.96;
+    transform:scale(1.005);
+  }
+
+  figcaption{
+    position:absolute;
+    right:.6rem;
+    bottom:.6rem;
+    max-width:78%;
+    padding:.4rem .6rem;
+    background:rgba(0,0,0,.5);
+    backdrop-filter: blur(2px);
+    color:#bdbdbd;
+    font-size:11px;
+    line-height:1.4;
+    border-radius:6px;
+    opacity:0;
+    transform:translateY(4px);
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  figure:hover figcaption{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  figure + figure{
+    margin-top:2.6rem;
+  }
+  /* Disparition progressive au scroll + réapparition au survol */
+p {
+  opacity: 1;
+  transition: opacity 2.5s ease, color 2.5s ease;
+}
+
+p[data-fade] {
+  opacity: var(--fade, 1);
+}
+
+/* réapparition progressive quand on survole */
+p:hover {
+  opacity: 1 !important;
+  color: #eee;
+}
+  /* Disparition et réapparition spectrales pour les titres */
+h1, h2, h3 {
+  opacity: 1;
+  transition: opacity 1s ease, color 1s ease;
+}
+
+h1[data-fade], h2[data-fade], h3[data-fade] {
+  opacity: var(--fade, 1);
+}
+
+/* Réapparition douce au survol */
+h1:hover, h2:hover, h3:hover {
+  opacity: 1 !important;
+  color: #fff;
+}
+</style>
+</head>
+
+<body>
   <main>
 
     <h1>
@@ -23,9 +167,9 @@
     </figure>
 
     <p>
-      Ce geste vise moins à produire une fiction alternative qu’à exposer la logique interne
-      de l’algorithme lorsqu’il est soustrait à ses mécanismes correctifs. Le projet interroge
-      la trace numérique comme matière instable, opératoire, critique. Ce travail de
+      Ce geste vise moins à produire une fiction alternative qu’à révéler la logique interne
+      de l’algorithme lorsqu’il est privé de ses mécanismes correctifs. Le projet interroge
+      la trace numérique comme matière instable, fluide, critique. Ce travail de
       création-recherche, qui articule défaillance programmée, esthétique spectrale et
       temporalité sans horizon, s’inscrit dans une réflexion plus large sur les usages
       critiques du numérique.
@@ -43,11 +187,10 @@
     </p>
 
     <p>
-      Déjà, chez Tourneur, un glissement s’opère entre l’action ponctuelle et une durée
-      subjective indéterminée, étirée, où le temps semble se diluer. C’est cette tension que
-      mon travail accentue. Face à Mitchum assis qui regarde presque le spectateur, j’imagine :
-      et si elle n’arrivait jamais ? Et si le film tout entier n’était plus qu’une attente
-      vide ?
+      Déjà, chez Tourneur, un glissement s’opère entre l’action et une temporalité subjective
+      marquée par la dérive mémorielle. C’est cette tension que mon travail accentue. Face à
+      Mitchum assis qui regarde presque le spectateur, j’imagine : et si elle n’arrivait
+      jamais ? Et si le film tout entier n’était plus qu’une attente vide ?
     </p>
 
     <figure>
@@ -58,10 +201,9 @@
     <p>
       Ce fragment de huit secondes concentre une attente qui menace de devenir infinie. De
       plus, le décor où Jeff Bailey attend – une reconstitution artificielle du RKO Encino
-      Ranch, aujourd’hui disparu – inscrit déjà ce plan dans une condition spectralisée,
-      issue de couches techniques et de fictions de studio. Travailler à partir de ce décor
-      factice, c’est manipuler un objet fragile, voué à sa propre disparition, davantage
-      qu’à une mémoire à restaurer.
+      Ranch, aujourd’hui disparu – inscrit déjà ce plan dans une mémoire spectrale. Travailler
+      à partir de ce décor factice, c’est manipuler un objet fragile, porteur de sa propre
+      disparition.
     </p>
 
     <h2>Détournement algorithmique : de la fluidité à la liquéfaction</h2>
@@ -88,18 +230,18 @@
     <h2>La trace numérique comme processus critique</h2>
 
     <p>
-      Ici, la trace ne vise pas à conserver ni à restituer un passé : elle altère. Chaque
-      image prolonge la précédente sans jamais la fixer. La trace devient un passage, un
-      seuil mouvant. Les figures se fragmentent, les silhouettes se superposent, jusqu’à ce
-      que l’image perde toute cohérence. Ce n’est pas un glitch ni un accident visuel mais
-      une entropie programmée, un écoulement sans repère stable.
+      Ici, la trace ne conserve rien, elle altère. Chaque image prolonge la précédente sans
+      jamais la fixer. La trace devient un passage, un seuil mouvant. Les figures se
+      fragmentent, les silhouettes se superposent, jusqu’à ce que l’image perde toute
+      cohérence. Ce n’est pas un glitch ni un accident visuel mais une entropie programmée,
+      un écoulement sans repère stable.
     </p>
 
     <p>
       Cette plasticité engage une autre manière de regarder : une attention flottante, libre
       de circuler. La logique prédictive excède son rôle et produit un espace habité par sa
-      propre perte. L’image ne se déconstruit pas comme récit, elle se défait depuis
-      l’intérieur de son dispositif de production.
+      propre perte. L’image ne se déconstruit pas narrativement mais s’érode depuis
+      l’intérieur.
     </p>
 
     <figure>
@@ -126,10 +268,37 @@
     <p>
       <em>All I Had to Do Was Wait</em> cherche à exposer cette dynamique : non pas la
       fluidité, mais l’extinction. L’image persiste dans un état d’irrésolution suspendue. Ce
-      n’est pas un effondrement cognitif ni une spéculation fictionnelle : c’est une
-      condition contemporaine des traces, où la mémoire cesse d’être le modèle dominant et
-      où les formes demeurent surtout activables, recalculables, maintenues en circulation
-      dans le flux.
+      n’est pas un effondrement cognitif ni une spéculation fictionnelle : c’est la
+      condition contemporaine des traces, où la mémoire ne s’édifie plus mais se dissout dans
+      le flux. 
     </p>
 
   </main>
+
+  <script>
+  /*
+  Effet spectral complet :
+  - Paragraphes ET titres disparaissent doucement au scroll
+  - réapparaissent lentement au survol
+  - reviennent aussi quand ils rentrent à nouveau dans le champ
+  */
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      const ratio = entry.intersectionRatio;
+      entry.target.style.setProperty('--fade', ratio.toFixed(2));
+    });
+  }, {
+    // seuils de détection fins (0 -> 1 en 0.05)
+    threshold: Array.from({length: 21}, (_, i) => i / 20)
+  });
+
+  // cibler paragraphes + titres
+  document.querySelectorAll('p, h1, h2, h3').forEach(el => {
+  el.setAttribute('data-fade', '');
+  observer.observe(el);
+});
+ </script>
+
+</body>
+</html>
