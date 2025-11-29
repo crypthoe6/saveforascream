@@ -30,43 +30,26 @@
       user-select:none;
     }
 
-    /* Rangée horizontale des entrées */
+    /* Zone plein écran qui contiendra les entrées */
     #row{
       position:fixed;
-      left:0; top:0;
-      display:flex;
-      align-items:center;
-      gap:var(--gap,28px);
-      white-space:nowrap;
+      inset:0;
       pointer-events:auto;
       visibility:hidden;
       opacity:0;
-      transition:opacity .2s ease, transform .3s ease;
-      transform:translate(0,0);
+      transition:opacity .2s ease;
     }
     #row.shown{ visibility:visible; opacity:1; }
 
-    /* Entrées */
+    /* Chaque titre d’œuvre */
     .entry{
-      font-family:inherit;
+      position:absolute;
       font-size:clamp(12px,1.6vw,16px);
-      color:var(--fg);
       white-space:nowrap;
       opacity:.95;
-      transition:
-        color .25s ease,
-        opacity .2s ease,
-        transform .3s ease;
-      padding:.1rem .2rem;
+      transition:color .25s ease, opacity .2s ease, transform .25s ease;
     }
     .entry:hover{ opacity:1; }
-    .entry:active{ animation:flash .25s ease; }
-
-    @keyframes flash{
-      0%{color:var(--fg);}
-      50%{color:#fff;}
-      100%{color:var(--fg);}
-    }
 
     .admin{
       position:fixed;
@@ -79,7 +62,7 @@
 <body>
   <div id="titre">saveforascream</div>
 
-  <!-- rangée horizontale des œuvres -->
+  <!-- les titres d’œuvres seront injectés ici -->
   <div id="row" aria-live="polite"></div>
 
   <a class="admin" href="admin.html">admin</a>
@@ -89,96 +72,112 @@
     const titre = document.getElementById('titre');
     const row   = document.getElementById('row');
 
-    let lastY = null; // dernière position verticale de la rangée
+    let data = [];        // œuvres
+    let ready = false;    // json chargé ?
+    let shown = false;    // titres déjà visibles ?
 
     function rand(min,max){ return Math.random() * (max - min) + min; }
 
-    // mélange l'ordre des enfants de #row
-    function shuffleRow(){
-      const children = Array.from(row.children);
-      for(let i = children.length - 1; i > 0; i--){
+    function shuffle(array){
+      for(let i = array.length - 1; i > 0; i--){
         const j = Math.floor(Math.random() * (i + 1));
-        [children[i], children[j]] = [children[j], children[i]];
+        [array[i], array[j]] = [array[j], array[i]];
       }
-      // réinjection dans le DOM
-      children.forEach(ch => row.appendChild(ch));
+      return array;
     }
 
-    // donne un léger décalage vertical à chaque entrée
-    function jitterEntries(){
-      const entries = row.querySelectorAll('.entry');
-      entries.forEach(e => {
-        const jitterY = rand(-8, 8); // petit décalage
-        e.style.transform = `translateY(${jitterY}px)`;
-      });
-    }
+    // place les titres à des positions aléatoires autour du titre central
+    function scatter(){
+      if (!data.length) return;
 
-    // déplaçe la rangée + mélanges titres + petits décalages
-    function repositionRow(){
-      const rowW = row.scrollWidth || 0;
       const W = window.innerWidth;
       const H = window.innerHeight;
       const margin = 24;
 
-      const maxX = Math.max(margin, W - rowW - margin);
-      const x = rand(margin, maxX);
+      const tRect = titre.getBoundingClientRect();
+      const forbidPadding = 32; // zone interdite autour du titre
+      const forbid = {
+        left:   tRect.left   - forbidPadding,
+        right:  tRect.right  + forbidPadding,
+        top:    tRect.top    - forbidPadding,
+        bottom: tRect.bottom + forbidPadding
+      };
 
-      const minY = H * 0.60;
-      const maxY = H * 0.85;
-      let y;
-      let tries = 0;
+      // on mélange l'ordre
+      const entries = Array.from(row.children);
+      shuffle(entries);
+      entries.forEach(e => row.appendChild(e));
 
-      do {
-        y = rand(minY, maxY);
-        tries++;
-      } while (lastY !== null && Math.abs(y - lastY) < 30 && tries < 10);
+      // pour chaque titre : tirage aléatoire jusqu'à sortir de la zone interdite
+      entries.forEach(el => {
+        const w = el.offsetWidth || 80;
+        const h = el.offsetHeight || 20;
 
-      lastY = y;
+        let x, y, tries = 0;
+        while(true){
+          x = rand(margin, W - w - margin);
+          y = rand(margin, H - h - margin);
 
-      shuffleRow();
-      jitterEntries();
+          const left = x;
+          const right = x + w;
+          const top = y;
+          const bottom = y + h;
 
-      row.style.transform = `translate(${x}px, ${y}px)`;
+          const overlap =
+            !(right < forbid.left ||
+              left  > forbid.right ||
+              bottom < forbid.top ||
+              top > forbid.bottom);
 
-      const gap = Math.round(rand(18, 48));
-      row.style.setProperty('--gap', `${gap}px`);
+          if (!overlap || tries > 20) break;
+          tries++;
+        }
+
+        el.style.transform = `translate(${x}px, ${y}px)`;
+      });
     }
 
-    // Chargement de la liste depuis index.json
+    // construit les liens une fois le JSON chargé
+    function buildEntries(){
+      row.innerHTML = '';
+      data.forEach(it => {
+        const a = document.createElement('a');
+        a.className = 'entry';
+        a.textContent = it.title;
+        a.href = it.path;
+        a.target = '_self';
+        row.appendChild(a);
+      });
+    }
+
+    // clic sur le titre
+    titre.addEventListener('click', () => {
+      if (!ready) return;        // si JSON pas encore chargé, on fait rien
+      if (!shown){
+        buildEntries();
+        row.classList.add('shown');
+        shown = true;
+      }
+      // attendre un frame pour être sûr d'avoir les tailles
+      requestAnimationFrame(scatter);
+    });
+
+    // au resize, on recalcule juste la dispersion si c'est visible
+    window.addEventListener('resize', () => {
+      if (shown) scatter();
+    });
+
+    // chargement des données
     fetch(JSON_PATH + '?_=' + Date.now())
       .then(r => r.json())
       .then(list => {
-        row.innerHTML = '';
-        list.forEach(it => {
-          const a = document.createElement('a');
-          a.className = 'entry';
-          a.textContent = it.title;
-          a.href = it.path;
-          a.target = '_self';
-          row.appendChild(a);
-        });
-        row.classList.add('shown');
-        repositionRow(); // première position
+        data = list;
+        ready = true;
       })
       .catch(() => {
-        row.innerHTML =
-          `<span class="entry">Impossible de charger <code>${JSON_PATH}</code></span>`;
-        row.classList.add('shown');
-        repositionRow();
+        data = [{ title: 'error loading index.json', path: '#' }];
+        ready = true;
       });
-
-    // Clic sur le titre → on remélange et on déplace
-    titre.addEventListener('click', () => {
-      if (!row.classList.contains('shown')) {
-        row.classList.add('shown');
-      }
-      requestAnimationFrame(repositionRow);
-    });
-
-    // Au resize, on recalcule une position
-    window.addEventListener('resize', () => {
-      if (row.classList.contains('shown')) repositionRow();
-    });
   </script>
 </body>
 </html>
