@@ -1,211 +1,152 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>saveforascream</title>
-  <style>
-    :root{ --bg:#000; --fg:#ddd; --muted:#a8a8a8; }
+<script>
+  const JSON_PATH = 'content/index.json';
+  const titre = document.getElementById('titre');
+  const row   = document.getElementById('row');
 
-    html,body{
-      height:100%;
-      margin:0;
-      background:var(--bg);
-      color:var(--fg);
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      overflow:hidden;
+  let works = [];     // données index.json
+  let ready = false;  // JSON chargé
+  let shown = false;  // nébuleuse déjà affichée ?
+
+  function rand(min,max){ return Math.random() * (max - min) + min; }
+
+  function shuffle(array){
+    for(let i = array.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
     }
+    return array;
+  }
 
-    a{ color:var(--fg); text-decoration:none }
+  // place les titres aléatoirement, tous à des hauteurs (y) distinctes,
+  // ET loin de leur précédente position pour que le changement soit visible
+  function scatter(){
+    const entries = Array.from(row.children);
+    if (!entries.length) return;
 
-    /* Titre central */
-    #titre{
-      position:fixed;
-      left:50%; top:50%;
-      transform:translate(-50%,-50%);
-      font-size:clamp(28px,6vw,64px);
-      letter-spacing:.02em;
-      white-space:nowrap;
-      cursor:pointer;
-      user-select:none;
-    }
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    const margin = 24;
 
-    /* Conteneur plein écran pour la "nébuleuse" de titres */
-    #row{
-      position:fixed;
-      inset:0;
-      pointer-events:auto;
-      visibility:hidden;
-      opacity:0;
-      transition:opacity .25s ease;
-    }
-    #row.shown{ visibility:visible; opacity:1; }
+    // zone interdite autour du titre central
+    const tRect = titre.getBoundingClientRect();
+    const pad = 32;
+    const forbid = {
+      left:   tRect.left   - pad,
+      right:  tRect.right  + pad,
+      top:    tRect.top    - pad,
+      bottom: tRect.bottom + pad
+    };
 
-    /* Chaque titre d’œuvre */
-    .entry{
-      position:absolute;
-      font-size:clamp(12px,1.6vw,16px);
-      white-space:nowrap;
-      opacity:.92;
-      transition:
-        color .25s ease,
-        opacity .2s ease,
-        transform .25s ease;
-      padding:.1rem .2rem;
-    }
-    .entry:hover{
-      opacity:1;
-    }
+    // ordre aléatoire
+    shuffle(entries);
+    entries.forEach(e => row.appendChild(e));
 
-    .admin{
-      position:fixed;
-      right:14px; bottom:10px;
-      font-size:12px;
-      color:var(--muted);
-    }
-  </style>
-</head>
-<body>
-  <div id="titre">saveforascream</div>
+    const usedY = [];
+    const minYSpacing = 28;   // écart vertical minimum entre titres
+    const minMoveDist = 40;   // distance minimale par rapport à l’ancienne position
 
-  <!-- les titres d’œuvres seront injectés ici -->
-  <div id="row" aria-live="polite"></div>
+    entries.forEach(el => {
+      const w = el.offsetWidth || 80;
+      const h = el.offsetHeight || 20;
 
-  <a class="admin" href="admin.html">admin</a>
+      // ancienne position (si elle existe)
+      const prevX = el.dataset.x ? parseFloat(el.dataset.x) : null;
+      const prevY = el.dataset.y ? parseFloat(el.dataset.y) : null;
 
-  <script>
-    const JSON_PATH = 'content/index.json';
-    const titre = document.getElementById('titre');
-    const row   = document.getElementById('row');
+      let x, y, tries = 0;
 
-    let works = [];     // données index.json
-    let ready = false;  // JSON chargé
-    let shown = false;  // nébuleuse déjà affichée ?
+      while (true) {
+        x = rand(margin, W - w - margin);
+        y = rand(margin, H - h - margin);
 
-    function rand(min,max){ return Math.random() * (max - min) + min; }
+        const left = x;
+        const right = x + w;
+        const top = y;
+        const bottom = y + h;
 
-    function shuffle(array){
-      for(let i = array.length - 1; i > 0; i--){
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    }
+        // éviter la zone du titre
+        const overlapTitle =
+          !(right < forbid.left ||
+            left  > forbid.right ||
+            bottom < forbid.top ||
+            top > forbid.bottom);
 
-    // place les titres aléatoirement, tous à des hauteurs (y) distinctes
-    function scatter(){
-      const entries = Array.from(row.children);
-      if (!entries.length) return;
-
-      const W = window.innerWidth;
-      const H = window.innerHeight;
-      const margin = 24;
-
-      // zone interdite autour du titre central
-      const tRect = titre.getBoundingClientRect();
-      const pad = 32;
-      const forbid = {
-        left:   tRect.left   - pad,
-        right:  tRect.right  + pad,
-        top:    tRect.top    - pad,
-        bottom: tRect.bottom + pad
-      };
-
-      // ordre aléatoire
-      shuffle(entries);
-      entries.forEach(e => row.appendChild(e));
-
-      const usedY = [];
-      const minYSpacing = 28; // écart vertical minimum -> jamais sur la même ligne
-
-      entries.forEach(el => {
-        const w = el.offsetWidth || 80;
-        const h = el.offsetHeight || 20;
-
-        let x, y, tries = 0;
-
-        while (true) {
-          x = rand(margin, W - w - margin);
-          y = rand(margin, H - h - margin);
-
-          const left = x;
-          const right = x + w;
-          const top = y;
-          const bottom = y + h;
-
-          // éviter la zone du titre
-          const overlapTitle =
-            !(right < forbid.left ||
-              left  > forbid.right ||
-              bottom < forbid.top ||
-              top > forbid.bottom);
-
-          if (overlapTitle && tries < 20) {
-            tries++;
-            continue;
-          }
-
-          // éviter de retomber sur la "même ligne" qu'un autre titre
-          let tooClose = false;
-          for (const yUsed of usedY) {
-            if (Math.abs(y - yUsed) < minYSpacing) {
-              tooClose = true;
-              break;
-            }
-          }
-          if (tooClose && tries < 40) {
-            tries++;
-            continue;
-          }
-
-          // position acceptée
-          usedY.push(y);
-          break;
+        if (overlapTitle && tries < 50) {
+          tries++;
+          continue;
         }
 
-        el.style.transform = `translate(${x}px, ${y}px)`;
-      });
-    }
+        // éviter de retomber sur la même "ligne" qu’un autre titre
+        let tooCloseY = false;
+        for (const yUsed of usedY) {
+          if (Math.abs(y - yUsed) < minYSpacing) {
+            tooCloseY = true;
+            break;
+          }
+        }
+        if (tooCloseY && tries < 80) {
+          tries++;
+          continue;
+        }
 
-    function buildEntries(){
-      row.innerHTML = '';
-      works.forEach(it => {
-        const a = document.createElement('a');
-        a.className = 'entry';
-        a.textContent = it.title;
-        a.href = it.path;
-        a.target = '_self';
-        row.appendChild(a);
-      });
-    }
+        // s’éloigner clairement de l’ancienne position
+        if (prevX !== null && prevY !== null) {
+          const dist = Math.hypot(x - prevX, y - prevY);
+          if (dist < minMoveDist && tries < 100) {
+            tries++;
+            continue;
+          }
+        }
 
-    // Clic sur le titre : fait apparaître / remélange la nébuleuse
-    titre.addEventListener('click', () => {
-      if (!ready) return;
-      if (!shown){
-        buildEntries();
-        row.classList.add('shown');
-        shown = true;
+        usedY.push(y);
+        break;
       }
-      requestAnimationFrame(scatter);
-    });
 
-    // Au resize, on recalcule la dispersion si elle est visible
-    window.addEventListener('resize', () => {
-      if (shown) scatter();
-    });
+      // mémoriser la nouvelle position
+      el.dataset.x = x;
+      el.dataset.y = y;
 
-    // Chargement des données depuis content/index.json
-    fetch(JSON_PATH + '?_=' + Date.now())
-      .then(r => r.json())
-      .then(list => {
-        works = list;
-        ready = true;
-      })
-      .catch(() => {
-        works = [{ title: 'error loading index.json', path: '#' }];
-        ready  = true;
-      });
-  </script>
-</body>
-</html>
+      el.style.transform = `translate(${x}px, ${y}px)`;
+    });
+  }
+
+  function buildEntries(){
+    row.innerHTML = '';
+    works.forEach(it => {
+      const a = document.createElement('a');
+      a.className = 'entry';
+      a.textContent = it.title;
+      a.href = it.path;
+      a.target = '_self';
+      row.appendChild(a);
+    });
+  }
+
+  // Clic sur le titre : fait apparaître / remélange la nébuleuse
+  titre.addEventListener('click', () => {
+    if (!ready) return;
+    if (!shown){
+      buildEntries();
+      row.classList.add('shown');
+      shown = true;
+    }
+    requestAnimationFrame(scatter);
+  });
+
+  // Au resize, on recalcule la dispersion si elle est visible
+  window.addEventListener('resize', () => {
+    if (shown) scatter();
+  });
+
+  // Chargement des données depuis content/index.json
+  fetch(JSON_PATH + '?_=' + Date.now())
+    .then(r => r.json())
+    .then(list => {
+      works = list;
+      ready = true;
+    })
+    .catch(() => {
+      works = [{ title: 'error loading index.json', path: '#' }];
+      ready  = true;
+    });
+</script>
