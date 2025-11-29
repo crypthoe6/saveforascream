@@ -36,7 +36,15 @@
     "path": "content/x-hausted-3/"
   },
   {
+    "title": "x_hausted (4)",
+    "path": "content/x-hausted-4/"
+  },
+  {
     "title": "Veille",
     "path": "content/veille/"
+  },
+  {
+    "title": "wholovesthesun",
+    "path": "content/wholovesthesun/"
   }
 ]
