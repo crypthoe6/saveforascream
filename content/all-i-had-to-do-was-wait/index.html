@@ -37,19 +37,6 @@
     margin:1.2rem 0 .4rem;
   }
 
-  h2{
-    margin-top:2.8rem;
-    font-size:clamp(16px,2.4vw,22px);
-    color:#ddd;
-    font-weight:400;
-    letter-spacing:.015em;
-    transition:color .6s ease, text-shadow .6s ease;
-  }
-  h2:hover{
-    color:#fff;
-    text-shadow:0 0 8px rgba(255,255,255,0.06);
-  }
-
   p{
     line-height:1.65;
     margin:0.9rem 0;
@@ -57,10 +44,16 @@
     opacity:.82;
     transition:opacity .6s ease, color .6s ease, text-shadow .6s ease;
   }
+
   p:hover{
     opacity:1;
     color:#ddd;
     text-shadow:0 0 6px rgba(255,255,255,0.04);
+  }
+
+  .meta{
+    margin-bottom:3rem;
+    opacity:.7;
   }
 
   figure{
@@ -85,44 +78,34 @@
     transform:scale(1.005);
   }
 
-  /* ✅ LÉGENDES MASQUÉES */
+  /* LÉGENDES MASQUÉES */
   figcaption{
     display:none;
   }
 
-  figure + figure{
-    margin-top:2.6rem;
+  /* ESPACES DÉDIÉS */
+  .spacer{
+    height:3rem;
+    display:block;
   }
 
-  /* Disparition progressive au scroll + réapparition au survol */
-  p {
-    opacity: 1;
+  /* Fade scroll */
+  p{
+    opacity:1;
     transition: opacity 2.5s ease, color 2.5s ease;
   }
 
-  p[data-fade] {
-    opacity: var(--fade, 1);
+  p[data-fade]{
+    opacity:var(--fade,1);
   }
 
-  p:hover {
-    opacity: 1 !important;
-    color: #eee;
+  p:hover{
+    opacity:1 !important;
+    color:#eee;
   }
 
-  h1, h2, h3 {
-    opacity: 1;
-    transition: opacity 1s ease, color 1s ease;
-  }
-
-  h1[data-fade], h2[data-fade], h3[data-fade] {
-    opacity: var(--fade, 1);
-  }
-
-  h1:hover, h2:hover, h3:hover {
-    opacity: 1 !important;
-    color: #fff;
-  }
 </style>
+
 
 <main>
 
@@ -132,8 +115,8 @@
 
   <p class="meta">2025</p>
 
-<div class="spacer"></div>
-  
+  <div class="spacer"></div>
+
   <p>
     <em>All I Had to Do Was Wait</em> détourne une fonction prédictive
     d’intelligence artificielle, <em>extend duration</em>, pour transformer un fragment issu
@@ -141,57 +124,47 @@
     liquéfaction visuelle progressive. En prolongeant, par itérations successives, un plan
     court du film original, l’image se défait de sa continuité narrative pour entrer dans
     un état d’instabilité formelle. Les figures se déforment, les plans se mêlent et le
-    récit se dissout.Ce geste vise moins à produire une fiction alternative qu’à exposer la logique interne
-    de l’algorithme lorsqu’il est privé de ses mécanismes correctifs. Le projet interroge
-    la trace numérique comme matière instable, opératoire, critique. Ce travail de
-    création-recherche, qui articule défaillance programmée, esthétique spectrale et
-    temporalité sans horizon, s’inscrit dans une réflexion plus large sur les usages
-    critiques du numérique. La pièce est développée à partir d’un plan fixe de huit secondes extrait du film
-    <em>Out of the Past</em> (1947), où Jeff Bailey (Robert Mitchum) attend seul dans un café,
-    La Mar Azul à Acapulco, l’arrivée de Kathie Moffat (Jane Greer). Dans le film original,
-    Kathie arrive rapidement. Pourtant, le monologue en voix off de Jeff Bailey raconte
-    l’attente différemment : il évoque ses « après-midis » passés à somnoler dans le café,
-    donnant l’impression d’une durée floue, répétitive, où veille et sommeil se confondent.
-    Déjà, chez Tourneur, un glissement s’opère entre l’action ponctuelle et une temporalité
-    subjective indéterminée, étirée, où le temps semble se diluer. C’est cette tension que
-    mon travail accentue. Face à Mitchum assis qui regarde presque le spectateur,
-    j’imagine : et si elle n’arrivait jamais ? Et si le film tout entier n’était plus
-    qu’une attente vide ?
+    récit se dissout. Ce geste vise moins à produire une fiction alternative qu’à exposer
+    la logique interne de l’algorithme lorsqu’il est privé de ses mécanismes correctifs.
+    Le projet interroge la trace numérique comme matière instable, opératoire, critique.
+    Ce travail de création-recherche, qui articule défaillance programmée, esthétique
+    spectrale et temporalité sans horizon, s’inscrit dans une réflexion plus large sur
+    les usages critiques du numérique.
   </p>
-<div class="spacer"></div>
+
+  <div class="spacer"></div>
+
   <figure>
-    <img src="../assets/images/wait-03.png" alt="Itération médiane du processus de liquéfaction">
+    <img src="../assets/images/wait-03.png" alt="Itération médiane du processus">
   </figure>
 
-<div class="spacer"></div>
+  <div class="spacer"></div>
+
   <figure>
-    <img src="../assets/images/wait-04.png" alt="Liquéfaction avancée du plan">
+    <img src="../assets/images/wait-04.png" alt="Itération avancée du processus">
   </figure>
-<div class="spacer"></div>
+
+  <div class="spacer"></div>
 
   <figure>
     <img src="../assets/images/wait-02.png" alt="Résidu final du processus">
   </figure>
-<div class="spacer"></div>
+
+  <div class="spacer"></div>
+
 </main>
 
-<script>
-  /*
-    Effet spectral :
-    - Paragraphes + titres disparaissent au scroll
-    - Réapparaissent au survol
-  */
 
+<script>
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
-      const ratio = entry.intersectionRatio;
-      entry.target.style.setProperty('--fade', ratio.toFixed(2));
+      entry.target.style.setProperty('--fade', entry.intersectionRatio.toFixed(2));
     });
   },{
     threshold: Array.from({length:21},(_,i)=>i/20)
   });
 
-  document.querySelectorAll('p, h1, h2, h3').forEach(el => {
+  document.querySelectorAll('p').forEach(el=>{
     el.setAttribute('data-fade','');
     observer.observe(el);
   });
