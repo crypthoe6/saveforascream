@@ -86,7 +86,6 @@
     const row   = document.getElementById('row');
 
     let works = [];     // données index.json
-    let ready = false;  // JSON chargé
     let shown = false;  // nébuleuse déjà affichée ?
 
     function rand(min,max){ return Math.random() * (max - min) + min; }
@@ -206,7 +205,9 @@
 
     // Clic sur le titre : fait apparaître / remélange la nébuleuse
     titre.addEventListener('click', () => {
-      if (!ready) return;
+      // si les données ne sont pas encore arrivées, on attend
+      if (!works.length) return;
+
       if (!shown){
         buildEntries();
         row.classList.add('shown');
@@ -225,11 +226,10 @@
       .then(r => r.json())
       .then(list => {
         works = list;
-        ready = true;
       })
       .catch(() => {
+        // fallback si jamais index.json pose problème
         works = [{ title: 'error loading index.json', path: '#' }];
-        ready  = true;
       });
   </script>
 </body>
