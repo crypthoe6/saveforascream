@@ -30,26 +30,30 @@
       user-select:none;
     }
 
-    /* Zone qui contient toutes les entrées, en plein écran */
+    /* Rangée horizontale des entrées */
     #row{
       position:fixed;
-      inset:0;              /* left:0; top:0; right:0; bottom:0 */
+      left:0; top:0;
+      display:flex;
+      align-items:center;
+      gap:var(--gap,28px);
+      white-space:nowrap;
       pointer-events:auto;
       visibility:hidden;
       opacity:0;
       transition:opacity .2s ease;
+      transform:translate(0,0); /* mis à jour en JS */
     }
     #row.shown{ visibility:visible; opacity:1; }
 
-    /* Chaque entrée est positionnée individuellement */
+    /* Entrées */
     .entry{
-      position:absolute;
       font-family:inherit;
       font-size:clamp(12px,1.6vw,16px);
       color:var(--fg);
       white-space:nowrap;
       opacity:.95;
-      transition:color .25s ease, opacity .2s ease, transform .3s ease;
+      transition:color .25s ease, opacity .2s ease;
       padding:.1rem .2rem;
     }
     .entry:hover{ opacity:1; }
@@ -65,14 +69,14 @@
       position:fixed;
       right:14px; bottom:10px;
       font-size:12px;
-      color:var(--muted)
+      color:var(--muted);
     }
   </style>
 </head>
 <body>
   <div id="titre">saveforascream</div>
 
-  <!-- contiendra les entrées, chacune positionnée en JS -->
+  <!-- rangée horizontale des œuvres -->
   <div id="row" aria-live="polite"></div>
 
   <a class="admin" href="admin.html">admin</a>
@@ -82,39 +86,12 @@
     const titre = document.getElementById('titre');
     const row   = document.getElementById('row');
 
+    let lastY = null; // dernière position verticale utilisée
+
     // utilitaire
     function rand(min,max){ return Math.random() * (max - min) + min; }
 
-    // Positionne chaque entrée à un endroit aléatoire,
-    // en évitant qu'elles soient toutes sur exactement la même "ligne".
-    function scatterEntries(){
-      const entries = row.querySelectorAll('.entry');
-      const W = window.innerWidth;
-      const H = window.innerHeight;
-
-      const marginX = 32;
-      const minY = H * 0.60;   // zone basse de l'écran
-      const maxY = H * 0.90;
-
-      let lastY = null;
-
-      entries.forEach(el => {
-        const w = el.offsetWidth || 80;
-        const h = el.offsetHeight || 20;
-
-        let x, y, tries = 0;
-        do {
-          x = rand(marginX, W - marginX - w);
-          y = rand(minY, maxY - h);
-          tries++;
-        } while (lastY !== null && Math.abs(y - lastY) < 24 && tries < 10);
-
-        lastY = y;
-        el.style.transform = `translate(${x}px, ${y}px)`;
-      });
-    }
-
-    // Charge le JSON et construit les liens
+    // Charge la liste d'œuvres et construit la rangée
     fetch(JSON_PATH + '?_=' + Date.now())
       .then(r => r.json())
       .then(list => {
@@ -128,7 +105,55 @@
           row.appendChild(a);
         });
         row.classList.add('shown');
-        // attendre un frame pour que les dimensions soient calculées
-        requestAnimationFrame(scatterEntries);
+        repositionRow(); // première position
       })
-      .catch(() =>
+      .catch(() => {
+        row.innerHTML =
+          `<span class="entry">Impossible de charger <code>${JSON_PATH}</code></span>`;
+        row.classList.add('shown');
+        repositionRow();
+      });
+
+    // Déplace la rangée à une position aléatoire (X,Y),
+    // en s'assurant que Y n'est jamais exactement la même "ligne".
+    function repositionRow(){
+      const rowW = row.scrollWidth || 0;
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      const margin = 16;
+
+      const maxX = Math.max(margin, W - rowW - margin);
+      const x = rand(margin, maxX);
+
+      const minY = H * 0.60;
+      const maxY = H * 0.85;
+      let y;
+      let tries = 0;
+
+      // éviter de retomber trop près de la même ligne verticale
+      do {
+        y = rand(minY, maxY);
+        tries++;
+      } while (lastY !== null && Math.abs(y - lastY) < 30 && tries < 10);
+
+      lastY = y;
+
+      row.style.transform = `translate(${x}px, ${y}px)`;
+
+      const gap = Math.round(rand(16, 44));
+      row.style.setProperty('--gap', `${gap}px`);
+    }
+
+    // Clic sur le titre → à chaque fois on déplace la rangée
+    titre.addEventListener('click', () => {
+      row.classList.add('shown');
+      requestAnimationFrame(repositionRow);
+    });
+
+    // Repositionner aussi au resize
+    window.addEventListener('resize', () => {
+      if (row.classList.contains('shown')) repositionRow();
+    });
+  </script>
+</body>
+</html>
