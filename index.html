@@ -41,8 +41,8 @@
       pointer-events:auto;
       visibility:hidden;
       opacity:0;
-      transition:opacity .2s ease;
-      transform:translate(0,0); /* mis à jour en JS */
+      transition:opacity .2s ease, transform .3s ease;
+      transform:translate(0,0);
     }
     #row.shown{ visibility:visible; opacity:1; }
 
@@ -53,7 +53,10 @@
       color:var(--fg);
       white-space:nowrap;
       opacity:.95;
-      transition:color .25s ease, opacity .2s ease;
+      transition:
+        color .25s ease,
+        opacity .2s ease,
+        transform .3s ease;
       padding:.1rem .2rem;
     }
     .entry:hover{ opacity:1; }
@@ -86,12 +89,62 @@
     const titre = document.getElementById('titre');
     const row   = document.getElementById('row');
 
-    let lastY = null; // dernière position verticale utilisée
+    let lastY = null; // dernière position verticale de la rangée
 
-    // utilitaire
     function rand(min,max){ return Math.random() * (max - min) + min; }
 
-    // Charge la liste d'œuvres et construit la rangée
+    // mélange l'ordre des enfants de #row
+    function shuffleRow(){
+      const children = Array.from(row.children);
+      for(let i = children.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [children[i], children[j]] = [children[j], children[i]];
+      }
+      // réinjection dans le DOM
+      children.forEach(ch => row.appendChild(ch));
+    }
+
+    // donne un léger décalage vertical à chaque entrée
+    function jitterEntries(){
+      const entries = row.querySelectorAll('.entry');
+      entries.forEach(e => {
+        const jitterY = rand(-8, 8); // petit décalage
+        e.style.transform = `translateY(${jitterY}px)`;
+      });
+    }
+
+    // déplaçe la rangée + mélanges titres + petits décalages
+    function repositionRow(){
+      const rowW = row.scrollWidth || 0;
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      const margin = 24;
+
+      const maxX = Math.max(margin, W - rowW - margin);
+      const x = rand(margin, maxX);
+
+      const minY = H * 0.60;
+      const maxY = H * 0.85;
+      let y;
+      let tries = 0;
+
+      do {
+        y = rand(minY, maxY);
+        tries++;
+      } while (lastY !== null && Math.abs(y - lastY) < 30 && tries < 10);
+
+      lastY = y;
+
+      shuffleRow();
+      jitterEntries();
+
+      row.style.transform = `translate(${x}px, ${y}px)`;
+
+      const gap = Math.round(rand(18, 48));
+      row.style.setProperty('--gap', `${gap}px`);
+    }
+
+    // Chargement de la liste depuis index.json
     fetch(JSON_PATH + '?_=' + Date.now())
       .then(r => r.json())
       .then(list => {
@@ -114,43 +167,15 @@
         repositionRow();
       });
 
-    // Déplace la rangée à une position aléatoire (X,Y),
-    // en s'assurant que Y n'est jamais exactement la même "ligne".
-    function repositionRow(){
-      const rowW = row.scrollWidth || 0;
-      const W = window.innerWidth;
-      const H = window.innerHeight;
-      const margin = 16;
-
-      const maxX = Math.max(margin, W - rowW - margin);
-      const x = rand(margin, maxX);
-
-      const minY = H * 0.60;
-      const maxY = H * 0.85;
-      let y;
-      let tries = 0;
-
-      // éviter de retomber trop près de la même ligne verticale
-      do {
-        y = rand(minY, maxY);
-        tries++;
-      } while (lastY !== null && Math.abs(y - lastY) < 30 && tries < 10);
-
-      lastY = y;
-
-      row.style.transform = `translate(${x}px, ${y}px)`;
-
-      const gap = Math.round(rand(16, 44));
-      row.style.setProperty('--gap', `${gap}px`);
-    }
-
-    // Clic sur le titre → à chaque fois on déplace la rangée
+    // Clic sur le titre → on remélange et on déplace
     titre.addEventListener('click', () => {
-      row.classList.add('shown');
+      if (!row.classList.contains('shown')) {
+        row.classList.add('shown');
+      }
       requestAnimationFrame(repositionRow);
     });
 
-    // Repositionner aussi au resize
+    // Au resize, on recalcule une position
     window.addEventListener('resize', () => {
       if (row.classList.contains('shown')) repositionRow();
     });
