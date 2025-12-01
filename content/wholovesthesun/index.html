@@ -1,1 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>wholovesthesun</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f5f5;
+    }
 
+    body {
+      position: relative;
+      touch-action: none;
+    }
+
+    #content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      box-sizing: border-box;
+      text-align: center;
+      background: #101010;
+      color: #f5f5f5;
+    }
+
+    #content-inner {
+      max-width: 320px;
+      opacity: 0.9;
+    }
+
+    #content h1 {
+      font-size: 1.1rem;
+      text-transform: lowercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+    }
+
+    #content p {
+      font-size: 0.85rem;
+      line-height: 1.3;
+      opacity: 0.8;
+    }
+
+    #noiseCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      mix-blend-mode: soft-light; /* joue sur le micro-contraste */
+      opacity: 0.07; /* valeur par défaut */
+    }
+
+    #controls {
+      position: absolute;
+      left: 50%;
+      bottom: 0.75rem;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 999px;
+      padding: 0.4rem 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #f5f5f5;
+      font-size: 0.75rem;
+      z-index: 10;
+    }
+
+    #controls label {
+      white-space: nowrap;
+    }
+
+    #controls input[type="range"] {
+      width: 110px;
+    }
+
+    #hide-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 0.15rem 0.6rem;
+      font-size: 0.7rem;
+      background: rgba(255, 255, 255, 0.08);
+      color: #f5f5f5;
+    }
+
+    #hide-btn:active {
+      background: rgba(255, 255, 255, 0.16);
+    }
+  </style>
+</head>
+<body>
+  <div id="content">
+    <div id="content-inner">
+      <h1>wholovesthesun</h1>
+      <p>
+        Tourne le téléphone vers le soleil.  
+        Le grain maintient juste assez de contraste pour que l’image tienne.
+      </p>
+    </div>
+  </div>
+
+  <canvas id="noiseCanvas"></canvas>
+
+  <div id="controls">
+    <label for="noiseRange">grain</label>
+    <input id="noiseRange" type="range" min="0" max="0.15" step="0.005" value="0.07">
+    <button id="hide-btn">masquer</button>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('noiseCanvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: false });
+      const range = document.getElementById('noiseRange');
+      const controls = document.getElementById('controls');
+      const hideBtn = document.getElementById('hide-btn');
+
+      let dpr = window.devicePixelRatio || 1;
+      let noiseSize = 220; // taille du bruit de base (sera upscalé)
+      let noiseCanvas = document.createElement('canvas');
+      let noiseCtx = noiseCanvas.getContext('2d');
+      noiseCanvas.width = noiseSize;
+      noiseCanvas.height = noiseSize;
+
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function generateNoise() {
+        const imageData = noiseCtx.createImageData(noiseSize, noiseSize);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          // gris aléatoire légèrement centré
+          const v = 110 + Math.random() * 70; 
+          data[i] = v;
+          data[i + 1] = v;
+          data[i + 2] = v;
+          data[i + 3] = 255;
+        }
+        noiseCtx.putImageData(imageData, 0, 0);
+      }
+
+      function loop() {
+        generateNoise();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const w = canvas.width / dpr;
+        const h = canvas.height / dpr;
+        ctx.drawImage(noiseCanvas, 0, 0, w, h);
+        requestAnimationFrame(loop);
+      }
+
+      range.addEventListener('input', () => {
+        const value = parseFloat(range.value);
+        canvas.style.opacity = value.toString();
+      });
+
+      hideBtn.addEventListener('click', () => {
+        if (controls.style.opacity === '0') {
+          controls.style.opacity = '1';
+          controls.style.pointerEvents = 'auto';
+          hideBtn.textContent = 'masquer';
+        } else {
+          controls.style.opacity = '0';
+          controls.style.pointerEvents = 'none';
+          // petit timeout pour pouvoir réappeler en rechargeant la page si besoin
+        }
+      });
+
+      window.addEventListener('resize', resize);
+
+      resize();
+      loop();
+    })();
+  </script>
+</body>
+</html>
