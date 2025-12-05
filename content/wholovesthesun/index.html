@@ -29,13 +29,14 @@
       font-size: 1rem;
       line-height: 1.5;
       text-align: center;
-      color: #e0e0e0;      /* très proche du fond */
-      opacity: 0.7;        /* seuil d’effacement */
-      letter-spacing: 0.04em;
+      color: #e8e8e8;    /* encore plus proche du fond */
+      opacity: 0.4;      /* présence fragile */
+      letter-spacing: 0.06em; /* un peu plus d'espacement */
+      font-weight: 300;  /* plus léger */
     }
 
     #text span.title {
-      font-weight: 500;
+      font-weight: 400;  /* légère mise en valeur du titre, sans lourdeur */
     }
 
     /* Bruit */
@@ -46,7 +47,7 @@
       height: 100%;
       pointer-events: none;
       mix-blend-mode: soft-light;
-      opacity: 0.07;
+      opacity: 0.07; /* valeur de départ, ensuite pilotée par le JS */
     }
   </style>
 </head>
@@ -108,8 +109,8 @@
         generateNoise();
 
         // respiration minimale de l’opacité du bruit
-        const base = 0.05;
-        const amplitude = 0.02;
+        const base = 0.045;
+        const amplitude = 0.012;
         const breathing = base + Math.sin(t) * amplitude;
         canvas.style.opacity = breathing.toFixed(3);
 
