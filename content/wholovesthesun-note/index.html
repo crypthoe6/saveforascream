@@ -40,12 +40,12 @@
       font-size:clamp(20px,2.6vw,28px);
       font-weight:500;
       letter-spacing:.02em;
-      margin:1.2rem 0 0; /* plus de marge en bas */
+      margin:1.2rem 0 .4rem;
     }
 
-    /* espace après le titre uniquement sur le premier paragraphe */
-    h1 + p{
-      margin-top:0.6rem; /* respiration claire mais pas énorme */
+    /* pas de marge supplémentaire sur le premier paragraphe */
+    h1 + .spacer + p{
+      margin-top:0;
     }
 
     p{
@@ -68,7 +68,7 @@
     }
 
     .spacer{
-      height:3rem;
+      height:1.2rem;
       display:block;
     }
 
@@ -90,6 +90,8 @@
     <h1>
       <a href="../../">wholovesthesun</a>
     </h1>
+
+    <div class="spacer"></div>
 
     <p>
 wholovesthesun est une pièce web minimale qui interroge les conditions contemporaines de visibilité des images. Plutôt que d’augmenter la luminosité ou de « corriger » l’écran dans des situations de forte exposition solaire, le projet explore un principe perceptif contre-intuitif : l’ajout d’une couche de bruit visuel quasi imperceptible contribue à stabiliser un signal fragile au lieu de l’intensifier. Ce geste s’appuie sur des phénomènes documentés en sciences de la perception, notamment la résonance stochastique, selon laquelle l’introduction d’un bruit de faible amplitude peut améliorer la détection de signaux faiblement contrastés dans des environnements perturbés. Il trouve également des parallèles dans les technologies d’affichage e-ink, où des micro-textures assurent la lisibilité sans rétroéclairage actif, ainsi que dans les travaux de visualisation montrant comment des motifs discrets peuvent renforcer la persistance des formes sous éblouissement.
